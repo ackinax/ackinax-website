@@ -16,9 +16,7 @@ export default function CtaSection() {
         </p>
         <div className="flex flex-wrap justify-center gap-4">
           <a
-            href="https://buy.stripe.com/00w3cv7yde0Z0ku92S0ZW04"
-            target="_blank"
-            rel="noopener noreferrer"
+            href="/nodes"
             className="inline-block font-heading font-semibold px-8 py-3.5 rounded-lg text-white glow-peach-sm transition-all duration-300 hover:brightness-110 hover:glow-peach"
             style={{ background: "linear-gradient(135deg, hsl(29 88% 67%), hsl(14 76% 49%))" }}
           >
