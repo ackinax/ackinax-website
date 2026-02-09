@@ -6,6 +6,8 @@ export default function NodesSection() {
     isVisible
   } = useScrollReveal();
   return <section id="nodes" className="relative py-28 px-6">
+      {/* Grid background */}
+      <div className="absolute inset-0 grid-bg pointer-events-none" />
       {/* Decorative glow */}
       <div className="absolute top-1/2 left-1/3 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full opacity-[0.08] blur-[140px] pointer-events-none" style={{ background: "hsl(29 88% 67%)" }} />
 
