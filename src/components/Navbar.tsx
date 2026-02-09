@@ -34,9 +34,6 @@ export default function Navbar() {
               </a>
             )
           )}
-          <a href="#services" className="btn-primary text-sm !py-2.5 !px-6">
-            Get Started
-          </a>
         </div>
 
         {/* Mobile toggle */}
