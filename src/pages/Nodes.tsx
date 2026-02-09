@@ -160,7 +160,7 @@ export default function Nodes() {
         <div className="max-w-[480px] mx-auto" ref={priceRef}>
           <div className={`${priceVis ? "animate-fade-slide-up" : "opacity-0"}`}>
             <div className="card-base relative overflow-hidden text-center">
-              <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-primary to-secondary" />
+              <div className="absolute top-0 left-0 right-0 h-[2px]" style={{ background: "linear-gradient(90deg, hsl(29 88% 67%), hsl(14 76% 49%))" }} />
               <p className="section-label mb-2">NODE LICENSE</p>
               <p className="font-body text-sm text-muted-foreground mb-6">For Acki Nacki validators</p>
 
