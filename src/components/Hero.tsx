@@ -12,7 +12,7 @@ export default function Hero() {
 
       <div className="relative z-10 text-center px-6 max-w-[860px] mx-auto flex flex-col items-center gap-6">
         {/* Logo */}
-        <img src={logo} alt="Ackinax" className="animate-fade-slide-up animate-stagger-1 h-32 md:h-40 mb-2" />
+        <img src={logo} alt="Ackinax" className="animate-fade-slide-up animate-stagger-1 h-32 md:h-40 mb-8" />
 
         {/* Status badge */}
         <div className="animate-fade-slide-up animate-stagger-1 inline-flex items-center gap-2.5 px-4 py-2 rounded-full border" style={{ background: "hsl(29 88% 67% / 0.08)", borderColor: "hsl(29 88% 67% / 0.19)" }}>
