@@ -2,7 +2,7 @@ import logo from "@/assets/Logo_V2_T-2.svg";
 
 export default function Hero() {
   return (
-    <section className="relative min-h-[70vh] flex items-start justify-center overflow-hidden pt-40 md:pt-48">
+    <section className="relative flex items-start justify-center overflow-hidden pt-40 md:pt-48 pb-16">
       {/* Glow orbs */}
       <div className="absolute top-[-10%] left-[-5%] w-[600px] h-[600px] rounded-full opacity-[0.12] blur-[120px] pointer-events-none" style={{ background: "hsl(29 88% 67%)" }} />
       <div className="absolute top-[5%] right-[-5%] w-[400px] h-[400px] rounded-full opacity-[0.10] blur-[100px] pointer-events-none" style={{ background: "hsl(14 76% 49%)" }} />
