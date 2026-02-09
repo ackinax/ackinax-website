@@ -61,6 +61,7 @@ serve(async (req) => {
         To: "talk@ackinax.com",
         Subject: `[Contact Form] ${subject}`,
         ReplyTo: email,
+        LayoutTemplate: "basic",
         HtmlBody: `
           <h2>New Contact Form Submission</h2>
           <p><strong>Name:</strong> ${escapeHtml(name)}</p>
