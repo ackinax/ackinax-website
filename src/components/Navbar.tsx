@@ -4,8 +4,7 @@ import logo from "@/assets/Logo_V2_T-2.svg";
 import { Link, useNavigate } from "react-router-dom";
 
 const navLinks = [
-  { label: "Services", href: "#services" },
-  { label: "Network", href: "#network" },
+  { label: "Services", href: "/#services" },
   { label: "Nodes", href: "/nodes" },
 ];
 
@@ -23,11 +22,10 @@ export default function Navbar() {
         <div className="hidden md:flex items-center gap-8">
           {navLinks.map((l) => {
             const cls = "text-muted-foreground hover:text-primary transition-colors duration-300 text-sm font-body";
-            return l.href.startsWith("/") ? (
-              <Link key={l.href} to={l.href} className={cls}>{l.label}</Link>
-            ) : (
-              <a key={l.href} href={l.href} className={cls}>{l.label}</a>
-            );
+            if (l.href.includes("#")) {
+              return <a key={l.href} href={l.href} className={cls}>{l.label}</a>;
+            }
+            return <Link key={l.href} to={l.href} className={cls}>{l.label}</Link>;
           })}
         </div>
 
@@ -40,11 +38,10 @@ export default function Navbar() {
         <div className="md:hidden border-t border-border px-6 py-4 flex flex-col gap-4 bg-background/95">
           {navLinks.map((l) => {
             const cls = "text-muted-foreground hover:text-primary transition-colors duration-300 text-sm font-body";
-            return l.href.startsWith("/") ? (
-              <Link key={l.href} to={l.href} onClick={() => setOpen(false)} className={cls}>{l.label}</Link>
-            ) : (
-              <a key={l.href} href={l.href} onClick={() => setOpen(false)} className={cls}>{l.label}</a>
-            );
+            if (l.href.includes("#")) {
+              return <a key={l.href} href={l.href} onClick={() => setOpen(false)} className={cls}>{l.label}</a>;
+            }
+            return <Link key={l.href} to={l.href} onClick={() => setOpen(false)} className={cls}>{l.label}</Link>;
           })}
         </div>
       )}
