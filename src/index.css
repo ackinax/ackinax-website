@@ -176,7 +176,7 @@
 
   .btn-ghost {
     @apply bg-transparent text-foreground font-heading font-semibold px-8 py-3.5 rounded-lg border border-border
-      transition-all duration-300 hover:bg-card-hover hover:border-muted-foreground/30;
+      transition-all duration-300 hover:border-primary/50 hover:text-primary;
   }
 
   .grid-bg {
