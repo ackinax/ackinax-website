@@ -184,7 +184,7 @@ export default function Nodes() {
 
               <p className="font-body text-xs text-muted-foreground">
                 Need volume pricing?{" "}
-                <a href="mailto:hello@ackinax.com" className="text-primary hover:underline">
+                <a href="/contact" className="text-primary hover:underline">
                   Contact us
                 </a>
               </p>
