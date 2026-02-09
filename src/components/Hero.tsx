@@ -11,6 +11,9 @@ export default function Hero() {
       <div className="absolute inset-0 grid-bg pointer-events-none" />
 
       <div className="relative z-10 text-center px-6 max-w-[860px] mx-auto flex flex-col items-center gap-6">
+        {/* Logo */}
+        <img src={logo} alt="Ackinax" className="animate-fade-slide-up animate-stagger-1 h-16 md:h-20 mb-2" />
+
         {/* Status badge */}
         <div className="animate-fade-slide-up animate-stagger-1 inline-flex items-center gap-2.5 px-4 py-2 rounded-full border" style={{ background: "hsl(29 88% 67% / 0.08)", borderColor: "hsl(29 88% 67% / 0.19)" }}>
           <span className="w-1.5 h-1.5 rounded-full bg-success animate-pulse-dot" />
