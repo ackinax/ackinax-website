@@ -293,7 +293,7 @@ export default function Nodes() {
           <p className="font-body text-base text-muted-foreground mb-8">
             Reach out and we'll help you find the right setup for your needs.
           </p>
-          <a href="mailto:hello@ackinax.com" className="btn-ghost">
+          <a href="/contact" className="btn-ghost">
             Contact Us
           </a>
         </div>
