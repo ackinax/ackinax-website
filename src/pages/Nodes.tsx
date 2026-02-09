@@ -1,117 +1,106 @@
 import { useScrollReveal } from "@/hooks/useScrollReveal";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import {
-  Zap,
-  Globe,
-  Shield,
-  MapPin,
-  Network,
-  Cpu,
-  ShieldCheck,
-  Leaf,
-  Server,
-  CheckCircle2,
-} from "lucide-react";
+import { Zap, Globe, Shield, MapPin, Network, Cpu, ShieldCheck, Leaf, Server, CheckCircle2 } from "lucide-react";
 
 /* ─── Section 2 data ─── */
-const whyCards = [
-  {
-    Icon: Zap,
-    title: "High Performance",
-    desc: "Optimized hardware configurations delivering consistent, reliable performance for Acki Nacki validation.",
-  },
-  {
-    Icon: Globe,
-    title: "Premium Connectivity",
-    desc: "NetIX peering with direct routes to major networks ensuring minimal latency and maximum uptime.",
-  },
-  {
-    Icon: Shield,
-    title: "Enterprise Security",
-    desc: "Multi-layered security with DDoS protection, encrypted connections, and 24/7 monitoring.",
-  },
-];
+const whyCards = [{
+  Icon: Zap,
+  title: "High Performance",
+  desc: "Optimized hardware configurations delivering consistent, reliable performance for Acki Nacki validation."
+}, {
+  Icon: Globe,
+  title: "Premium Connectivity",
+  desc: "NetIX peering with direct routes to major networks ensuring minimal latency and maximum uptime."
+}, {
+  Icon: Shield,
+  title: "Enterprise Security",
+  desc: "Multi-layered security with DDoS protection, encrypted connections, and 24/7 monitoring."
+}];
 
 /* ─── Section 3 data ─── */
-const pricingChecklist = [
-  "High-performance hardware",
-  "Premium NetIX connectivity",
-  "24/7 monitoring",
-  "99.9% uptime SLA",
-  "Technical support",
-];
+const pricingChecklist = ["High-performance hardware", "Premium NetIX connectivity", "24/7 monitoring", "99.9% uptime SLA", "Technical support"];
 
 /* ─── Section 4 data ─── */
-const stats = [
-  { value: "99.9%", label: "Uptime Guarantee" },
-  { value: "24/7", label: "Active Monitoring" },
-  { value: "<1ms", label: "Network Latency" },
-];
+const stats = [{
+  value: "99.9%",
+  label: "Uptime Guarantee"
+}, {
+  value: "24/7",
+  label: "Active Monitoring"
+}, {
+  value: "<1ms",
+  label: "Network Latency"
+}];
 
 /* ─── Section 5 data ─── */
 const greenTags = ["Solar Energy", "Wind Power", "Carbon Neutral"];
 
 /* ─── Section 6 data ─── */
-const infraCards = [
-  {
-    Icon: MapPin,
-    title: "Heart of Europe's Connectivity",
-    desc: "Strategically located at Europe's connectivity center, providing optimal routing to all major networks.",
-  },
-  {
-    Icon: Network,
-    title: "Most Connected Datacenter",
-    desc: "Direct peering with all major service providers ensuring the lowest latency and best route optimization.",
-  },
-  {
-    Icon: Zap,
-    title: "End-to-end Fiber Connectivity",
-    desc: "Full fiber infrastructure delivering ultra-low latency connections across the entire network path.",
-  },
-  {
-    Icon: Cpu,
-    title: "Enterprise Level Hardware",
-    desc: "Latest generation server hardware with redundant components for maximum reliability and performance.",
-  },
-  {
-    Icon: ShieldCheck,
-    title: "ISO Certified",
-    desc: "ISO 27001, ISO 22301, and ISO 50001 certifications ensuring the highest standards in security, business continuity, and energy management.",
-  },
-];
-
+const infraCards = [{
+  Icon: MapPin,
+  title: "Heart of Europe's Connectivity",
+  desc: "Strategically located at Europe's connectivity center, providing optimal routing to all major networks."
+}, {
+  Icon: Network,
+  title: "Most Connected Datacenter",
+  desc: "Direct peering with all major service providers ensuring the lowest latency and best route optimization."
+}, {
+  Icon: Zap,
+  title: "End-to-end Fiber Connectivity",
+  desc: "Full fiber infrastructure delivering ultra-low latency connections across the entire network path."
+}, {
+  Icon: Cpu,
+  title: "Enterprise Level Hardware",
+  desc: "Latest generation server hardware with redundant components for maximum reliability and performance."
+}, {
+  Icon: ShieldCheck,
+  title: "ISO Certified",
+  desc: "ISO 27001, ISO 22301, and ISO 50001 certifications ensuring the highest standards in security, business continuity, and energy management."
+}];
 export default function Nodes() {
-  const { ref: heroRef, isVisible: heroVis } = useScrollReveal(0.1);
-  const { ref: whyRef, isVisible: whyVis } = useScrollReveal();
-  const { ref: priceRef, isVisible: priceVis } = useScrollReveal();
-  const { ref: scaleRef, isVisible: scaleVis } = useScrollReveal();
-  const { ref: greenRef, isVisible: greenVis } = useScrollReveal();
-  const { ref: infraRef, isVisible: infraVis } = useScrollReveal();
-
-  return (
-    <div className="min-h-screen bg-background relative">
+  const {
+    ref: heroRef,
+    isVisible: heroVis
+  } = useScrollReveal(0.1);
+  const {
+    ref: whyRef,
+    isVisible: whyVis
+  } = useScrollReveal();
+  const {
+    ref: priceRef,
+    isVisible: priceVis
+  } = useScrollReveal();
+  const {
+    ref: scaleRef,
+    isVisible: scaleVis
+  } = useScrollReveal();
+  const {
+    ref: greenRef,
+    isVisible: greenVis
+  } = useScrollReveal();
+  const {
+    ref: infraRef,
+    isVisible: infraVis
+  } = useScrollReveal();
+  return <div className="min-h-screen bg-background relative">
       {/* Grid background */}
       <div className="fixed inset-0 grid-bg pointer-events-none" />
 
       {/* Glow orbs */}
-      <div
-        className="fixed top-[-200px] left-[-100px] w-[600px] h-[600px] rounded-full opacity-[0.08] pointer-events-none"
-        style={{ background: "radial-gradient(circle, hsl(29 88% 67%), transparent 70%)" }}
-      />
-      <div
-        className="fixed bottom-[-200px] right-[-100px] w-[400px] h-[400px] rounded-full opacity-[0.06] pointer-events-none"
-        style={{ background: "radial-gradient(circle, hsl(14 76% 49%), transparent 70%)" }}
-      />
+      <div className="fixed top-[-200px] left-[-100px] w-[600px] h-[600px] rounded-full opacity-[0.08] pointer-events-none" style={{
+      background: "radial-gradient(circle, hsl(29 88% 67%), transparent 70%)"
+    }} />
+      <div className="fixed bottom-[-200px] right-[-100px] w-[400px] h-[400px] rounded-full opacity-[0.06] pointer-events-none" style={{
+      background: "radial-gradient(circle, hsl(14 76% 49%), transparent 70%)"
+    }} />
 
       <Navbar />
 
       {/* ─── 1. Hero ─── */}
       <section className="pt-32 pb-20 px-6">
         <div className="max-w-[1100px] mx-auto" ref={heroRef}>
-          <div
-            className={`grid md:grid-cols-2 gap-12 items-center ${heroVis ? "animate-fade-slide-up" : "opacity-0"}`}
-          >
+          <div className={`grid md:grid-cols-2 gap-12 items-center ${heroVis ? "animate-fade-slide-up" : "opacity-0"}`}>
             {/* Left */}
             <div>
               <p className="section-label mb-4">NODES AS A SERVICE</p>
@@ -130,7 +119,9 @@ export default function Nodes() {
             {/* Right — decorative server visual */}
             <div className="flex justify-center">
               <div className="relative w-[280px] h-[280px] rounded-3xl border border-border bg-card flex items-center justify-center gap-6">
-                <div className="absolute inset-0 rounded-3xl opacity-20" style={{ background: "radial-gradient(circle at 50% 40%, hsl(29 88% 67%), transparent 70%)" }} />
+                <div className="absolute inset-0 rounded-3xl opacity-20" style={{
+                background: "radial-gradient(circle at 50% 40%, hsl(29 88% 67%), transparent 70%)"
+              }} />
                 <Server size={64} className="text-primary relative z-10" strokeWidth={1.2} />
                 <Server size={64} className="text-secondary relative z-10" strokeWidth={1.2} />
               </div>
@@ -152,15 +143,13 @@ export default function Nodes() {
             </p>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {whyCards.map((c) => (
-                <div key={c.title} className="card-base group hover:bg-card-hover transition-all duration-300">
+              {whyCards.map(c => <div key={c.title} className="card-base group transition-all duration-300 bg-background">
                   <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center mb-4">
                     <c.Icon size={20} className="text-primary" />
                   </div>
                   <h3 className="font-heading text-lg font-semibold text-foreground mb-2">{c.title}</h3>
                   <p className="font-body text-sm text-muted-foreground leading-[1.65]">{c.desc}</p>
-                </div>
-              ))}
+                </div>)}
             </div>
           </div>
         </div>
@@ -181,21 +170,14 @@ export default function Nodes() {
               </div>
 
               <ul className="space-y-3 mb-8 text-left inline-block">
-                {pricingChecklist.map((item) => (
-                  <li key={item} className="flex items-center gap-3">
+                {pricingChecklist.map(item => <li key={item} className="flex items-center gap-3">
                     <CheckCircle2 size={16} className="text-primary shrink-0" />
                     <span className="font-body text-sm text-foreground">{item}</span>
-                  </li>
-                ))}
+                  </li>)}
               </ul>
 
               <div className="mb-6">
-                <a
-                  href="https://buy.stripe.com/00w3cv7yde0Z0ku92S0ZW04"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="btn-primary w-full block text-center"
-                >
+                <a href="https://buy.stripe.com/00w3cv7yde0Z0ku92S0ZW04" target="_blank" rel="noopener noreferrer" className="btn-primary w-full block text-center">
                   Subscribe Now
                 </a>
               </div>
@@ -224,16 +206,12 @@ export default function Nodes() {
             </p>
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-              {stats.map((s) => (
-                <div
-                  key={s.label}
-                  className="rounded-xl border border-border p-8 text-center"
-                  style={{ background: "hsl(29 88% 67% / 0.05)" }}
-                >
+              {stats.map(s => <div key={s.label} className="rounded-xl border border-border p-8 text-center" style={{
+              background: "hsl(29 88% 67% / 0.05)"
+            }}>
                   <p className="font-heading text-3xl md:text-4xl font-bold text-primary mb-2">{s.value}</p>
                   <p className="font-body text-sm text-muted-foreground">{s.label}</p>
-                </div>
-              ))}
+                </div>)}
             </div>
           </div>
         </div>
@@ -254,15 +232,12 @@ export default function Nodes() {
                 Our data center is powered entirely by renewable energy sources. We're committed to sustainable blockchain infrastructure, ensuring that your participation in the network contributes to a greener future.
               </p>
               <div className="flex flex-wrap justify-center gap-3">
-                {greenTags.map((tag) => (
-                  <span
-                    key={tag}
-                    className="font-mono-brand text-xs px-4 py-2 rounded-full border border-border"
-                    style={{ background: "hsl(29 88% 67% / 0.08)", color: "hsl(29 80% 72%)" }}
-                  >
+                {greenTags.map(tag => <span key={tag} className="font-mono-brand text-xs px-4 py-2 rounded-full border border-border" style={{
+                background: "hsl(29 88% 67% / 0.08)",
+                color: "hsl(29 80% 72%)"
+              }}>
                     {tag}
-                  </span>
-                ))}
+                  </span>)}
               </div>
             </div>
           </div>
@@ -283,26 +258,22 @@ export default function Nodes() {
 
             {/* 3 + 2 grid */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {infraCards.slice(0, 3).map((c) => (
-                <div key={c.title} className="card-base group hover:bg-card-hover transition-all duration-300">
+              {infraCards.slice(0, 3).map(c => <div key={c.title} className="card-base group hover:bg-card-hover transition-all duration-300">
                   <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center mb-4">
                     <c.Icon size={20} className="text-primary" />
                   </div>
                   <h3 className="font-heading text-lg font-semibold text-foreground mb-2">{c.title}</h3>
                   <p className="font-body text-sm text-muted-foreground leading-[1.65]">{c.desc}</p>
-                </div>
-              ))}
+                </div>)}
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
-              {infraCards.slice(3).map((c) => (
-                <div key={c.title} className="card-base group hover:bg-card-hover transition-all duration-300">
+              {infraCards.slice(3).map(c => <div key={c.title} className="card-base group hover:bg-card-hover transition-all duration-300">
                   <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center mb-4">
                     <c.Icon size={20} className="text-primary" />
                   </div>
                   <h3 className="font-heading text-lg font-semibold text-foreground mb-2">{c.title}</h3>
                   <p className="font-body text-sm text-muted-foreground leading-[1.65]">{c.desc}</p>
-                </div>
-              ))}
+                </div>)}
             </div>
           </div>
         </div>
@@ -311,10 +282,9 @@ export default function Nodes() {
       {/* ─── 7. CTA / Contact ─── */}
       <section className="py-20 px-6 text-center relative">
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-          <div
-            className="w-[400px] h-[400px] rounded-full opacity-[0.08]"
-            style={{ background: "radial-gradient(circle, hsl(29 88% 67%), transparent 70%)" }}
-          />
+          <div className="w-[400px] h-[400px] rounded-full opacity-[0.08]" style={{
+          background: "radial-gradient(circle, hsl(29 88% 67%), transparent 70%)"
+        }} />
         </div>
         <div className="relative max-w-[600px] mx-auto">
           <h2 className="font-heading text-3xl md:text-4xl font-bold text-foreground tracking-tight mb-4">
@@ -330,6 +300,5 @@ export default function Nodes() {
       </section>
 
       <Footer />
-    </div>
-  );
+    </div>;
 }
