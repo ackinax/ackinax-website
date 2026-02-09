@@ -3,7 +3,9 @@ import { Menu, X } from "lucide-react";
 import logo from "@/assets/Logo_V2_T-2.svg";
 import { Link, useNavigate } from "react-router-dom";
 
-const navLinks: { label: string; href: string }[] = [];
+const navLinks: { label: string; href: string }[] = [
+  { label: "Contact", href: "/contact" },
+];
 
 export default function Navbar() {
   const [open, setOpen] = useState(false);

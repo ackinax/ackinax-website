@@ -15,8 +15,8 @@ export default function Footer() {
             <a
               key={l.label}
               href={l.href}
-              target={l.href.startsWith("mailto") ? undefined : "_blank"}
-              rel="noopener noreferrer"
+              target={l.href.startsWith("http") ? "_blank" : undefined}
+              rel={l.href.startsWith("http") ? "noopener noreferrer" : undefined}
               className="font-body text-[13px] text-dim hover:text-muted-foreground transition-colors"
             >
               {l.label}
