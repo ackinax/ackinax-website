@@ -24,7 +24,7 @@ export default function NodesSection() {
           </div>
 
           <div className="flex flex-wrap gap-4">
-            <a href="https://buy.stripe.com/00w3cv7yde0Z0ku92S0ZW04" target="_blank" rel="noopener noreferrer" className="btn-primary">
+            <a target="_blank" rel="noopener noreferrer" className="btn-primary" href="/nodes">
               Subscribe
             </a>
             <a href="https://billing.stripe.com/p/login/00w6oH7yd1ed9V47YO0ZW00" target="_blank" rel="noopener noreferrer" className="btn-ghost">
