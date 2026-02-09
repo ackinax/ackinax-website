@@ -82,6 +82,7 @@ serve(async (req) => {
         From: "Ackinax <talk@ackinax.com>",
         To: email,
         Subject: "We received your message",
+        LayoutTemplate: "basic",
         HtmlBody: `
           <p>Hi ${escapeHtml(name)},</p>
           <p>Thanks for reaching out! We've received your message and our team will get back to you as soon as possible.</p>
