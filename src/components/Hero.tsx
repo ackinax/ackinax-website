@@ -34,13 +34,8 @@ export default function Hero() {
           Oracle data feeds, node infrastructure, and developer tools for the Acki Nacki network.
         </p>
 
-        {/* Buttons */}
-        <div className="animate-fade-slide-up animate-stagger-4 flex flex-wrap justify-center gap-4 mt-2">
-          <a href="#services" className="btn-primary">Explore Services</a>
-          <a href="https://ackinacki.com" target="_blank" rel="noopener noreferrer" className="btn-ghost">
-            Learn About Acki Nacki →
-          </a>
-        </div>
+        </p>
+      </div>
       </div>
     </section>
   );
