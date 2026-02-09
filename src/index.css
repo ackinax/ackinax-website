@@ -184,8 +184,8 @@
       linear-gradient(hsl(220 27% 16% / 0.25) 1px, transparent 1px),
       linear-gradient(90deg, hsl(220 27% 16% / 0.25) 1px, transparent 1px);
     background-size: 64px 64px;
-    mask-image: radial-gradient(ellipse 60% 50% at 50% 30%, black 20%, transparent 70%);
-    -webkit-mask-image: radial-gradient(ellipse 60% 50% at 50% 30%, black 20%, transparent 70%);
+    mask-image: radial-gradient(ellipse 70% 60% at 50% 50%, black 20%, transparent 70%);
+    -webkit-mask-image: radial-gradient(ellipse 70% 60% at 50% 50%, black 20%, transparent 70%);
   }
 
   .animate-stagger-1 { animation-delay: 0ms; }
