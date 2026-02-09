@@ -33,9 +33,9 @@ function statusColor(status: ServiceCard["status"]) {
     border: "hsl(160 60% 45% / 0.3)"
   };
   if (status === "ACTIVE") return {
-    text: "hsl(29 88% 67%)",
-    bg: "hsl(29 88% 67% / 0.1)",
-    border: "hsl(29 88% 67% / 0.3)"
+    text: "hsl(160 60% 45%)",
+    bg: "hsl(160 60% 45% / 0.1)",
+    border: "hsl(160 60% 45% / 0.3)"
   };
   return {
     text: "hsl(215 17% 42%)",
