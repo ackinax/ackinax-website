@@ -10,6 +10,7 @@ const navLinks = [
 
 export default function Navbar() {
   const [open, setOpen] = useState(false);
+  const navigate = useNavigate();
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 backdrop-blur-2xl border-b border-border" style={{ backgroundColor: "hsl(220 33% 4% / 0.8)" }}>
