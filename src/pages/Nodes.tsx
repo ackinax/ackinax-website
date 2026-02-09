@@ -268,7 +268,8 @@ export default function Nodes() {
                 </div>)}
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
-              {infraCards.slice(3).map(c => <div key={c.title} className="card-base group hover:bg-card-hover transition-all duration-300">
+              {infraCards.slice(3).map(c => <div key={c.title} className="card-base group relative overflow-hidden transition-all duration-300">
+                  <div className="absolute top-0 left-0 right-0 h-0.5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" style={{ background: "linear-gradient(90deg, hsl(29 88% 67%), transparent)" }} />
                   <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center mb-4">
                     <c.Icon size={20} className="text-primary" />
                   </div>
