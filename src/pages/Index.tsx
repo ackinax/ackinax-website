@@ -16,7 +16,7 @@ const Index = () => {
       <Services />
       <PredictionMarkets />
       <NodesSection />
-      <NetworkStats />
+      
       <WhyAckinax />
       <CtaSection />
       <Footer />
