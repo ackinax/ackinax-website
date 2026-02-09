@@ -25,11 +25,17 @@ export default function Navbar() {
 
         {/* Desktop links */}
         <div className="hidden md:flex items-center gap-8">
-          {navLinks.map((l) => (
-            <a key={l.href} href={l.href} className="text-muted-foreground hover:text-foreground transition-colors text-sm font-body">
-              {l.label}
-            </a>
-          ))}
+          {navLinks.map((l) =>
+            l.href.startsWith("/") ? (
+              <Link key={l.href} to={l.href} className="text-muted-foreground hover:text-foreground transition-colors text-sm font-body">
+                {l.label}
+              </Link>
+            ) : (
+              <a key={l.href} href={l.href} className="text-muted-foreground hover:text-foreground transition-colors text-sm font-body">
+                {l.label}
+              </a>
+            )
+          )}
           <a href="#services" className="btn-primary text-sm !py-2.5 !px-6">
             Get Started
           </a>
