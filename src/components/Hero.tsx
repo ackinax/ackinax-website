@@ -33,9 +33,6 @@ export default function Hero() {
         <p className="animate-fade-slide-up animate-stagger-3 text-muted-foreground text-lg max-w-[540px] leading-relaxed font-body">
           Oracle data feeds, node infrastructure, and developer tools for the Acki Nacki network.
         </p>
-
-        </p>
-      </div>
       </div>
     </section>
   );
