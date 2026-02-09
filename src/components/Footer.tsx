@@ -3,6 +3,7 @@ const links = [
   { label: "DoDex", href: "https://www.dex.do" },
   { label: "AckiScan", href: "https://ackiscan.com" },
   { label: "Contact", href: "/contact" },
+  { label: "Terms of Service", href: "/terms" },
 ];
 
 export default function Footer() {
