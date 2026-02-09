@@ -50,11 +50,17 @@ export default function Navbar() {
       {/* Mobile menu */}
       {open && (
         <div className="md:hidden border-t border-border px-6 py-4 flex flex-col gap-4" style={{ backgroundColor: "hsl(220 33% 4% / 0.95)" }}>
-          {navLinks.map((l) => (
-            <a key={l.href} href={l.href} onClick={() => setOpen(false)} className="text-muted-foreground hover:text-foreground transition-colors text-sm font-body">
-              {l.label}
-            </a>
-          ))}
+          {navLinks.map((l) =>
+            l.href.startsWith("/") ? (
+              <Link key={l.href} to={l.href} onClick={() => setOpen(false)} className="text-muted-foreground hover:text-foreground transition-colors text-sm font-body">
+                {l.label}
+              </Link>
+            ) : (
+              <a key={l.href} href={l.href} onClick={() => setOpen(false)} className="text-muted-foreground hover:text-foreground transition-colors text-sm font-body">
+                {l.label}
+              </a>
+            )
+          )}
           <a href="#services" onClick={() => setOpen(false)} className="btn-primary text-sm text-center !py-2.5">
             Get Started
           </a>
