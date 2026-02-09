@@ -38,11 +38,10 @@ export default function Navbar() {
         <div className="md:hidden border-t border-border px-6 py-4 flex flex-col gap-4 bg-background/95">
           {navLinks.map((l) => {
             const cls = "text-muted-foreground hover:text-primary transition-colors duration-300 text-sm font-body";
-            return l.href.startsWith("/") ? (
-              <Link key={l.href} to={l.href} onClick={() => setOpen(false)} className={cls}>{l.label}</Link>
-            ) : (
-              <a key={l.href} href={l.href} onClick={() => setOpen(false)} className={cls}>{l.label}</a>
-            );
+            if (l.href.includes("#")) {
+              return <a key={l.href} href={l.href} onClick={() => setOpen(false)} className={cls}>{l.label}</a>;
+            }
+            return <Link key={l.href} to={l.href} onClick={() => setOpen(false)} className={cls}>{l.label}</Link>;
           })}
         </div>
       )}
