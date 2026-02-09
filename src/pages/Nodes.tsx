@@ -247,7 +247,7 @@ export default function Nodes() {
       {/* ─── 6. World-Class Infrastructure ─── */}
       <section className="py-20 px-6">
         <div className="max-w-[1100px] mx-auto" ref={infraRef}>
-          <div className={`${infraVis ? "animate-fade-slide-up" : "opacity-0"}`}>
+          <div className="">
             <p className="section-label mb-3 text-center">DATACENTER</p>
             <h2 className="font-heading text-3xl md:text-4xl font-bold text-foreground tracking-tight mb-3 text-center">
               World-Class Infrastructure
