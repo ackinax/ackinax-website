@@ -17,12 +17,9 @@ export default function Navbar() {
     <nav className="fixed top-0 left-0 right-0 z-50 backdrop-blur-2xl border-b border-border" style={{ backgroundColor: "hsl(220 33% 4% / 0.8)" }}>
       <div className="max-w-[1200px] mx-auto flex items-center justify-between px-6 md:px-10 py-4">
         {/* Logo */}
-        <a href="#" className="flex items-center gap-2.5">
-          <div className="w-7 h-7 rounded-md bg-gradient-to-br from-primary to-secondary flex items-center justify-center">
-            <span className="font-mono-brand text-sm font-bold text-white leading-none">A</span>
-          </div>
-          <span className="font-mono-brand text-lg font-bold text-foreground">ackinax</span>
-        </a>
+        <Link to="/" className="flex items-center">
+          <img src={logo} alt="Ackinax" className="h-6 md:h-7" />
+        </Link>
 
         {/* Desktop links */}
         <div className="hidden md:flex items-center gap-8">
