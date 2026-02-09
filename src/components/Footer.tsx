@@ -2,7 +2,7 @@ const links = [
   { label: "Acki Nacki", href: "https://ackinacki.com" },
   { label: "DoDex", href: "https://www.dex.do" },
   { label: "AckiScan", href: "https://ackiscan.com" },
-  { label: "Contact", href: "mailto:hello@ackinax.com" },
+  { label: "Contact", href: "/contact" },
 ];
 
 export default function Footer() {
