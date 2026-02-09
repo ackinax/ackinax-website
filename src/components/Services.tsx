@@ -94,7 +94,7 @@ export default function Services() {
           </h2>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))" }}>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
           {cards.map((card, i) => (
             <Card key={card.title} card={card} index={i} />
           ))}
