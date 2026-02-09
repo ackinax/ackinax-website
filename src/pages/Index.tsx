@@ -14,8 +14,8 @@ const Index = () => {
       <Navbar />
       <Hero />
       <Services />
-      <PredictionMarkets />
       <NodesSection />
+      <PredictionMarkets />
       
       <WhyAckinax />
       <CtaSection />
