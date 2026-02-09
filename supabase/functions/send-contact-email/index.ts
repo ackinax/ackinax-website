@@ -61,6 +61,7 @@ serve(async (req) => {
         To: "talk@ackinax.com",
         Subject: `[Contact Form] ${subject}`,
         ReplyTo: email,
+        MessageStream: "general-ackinax",
         LayoutTemplate: "basic",
         HtmlBody: `
           <h2>New Contact Form Submission</h2>
@@ -82,6 +83,7 @@ serve(async (req) => {
         From: "Ackinax <talk@ackinax.com>",
         To: email,
         Subject: "We received your message",
+        MessageStream: "general-ackinax",
         LayoutTemplate: "basic",
         HtmlBody: `
           <p>Hi ${escapeHtml(name)},</p>
