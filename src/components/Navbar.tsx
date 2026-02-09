@@ -22,11 +22,10 @@ export default function Navbar() {
         <div className="hidden md:flex items-center gap-8">
           {navLinks.map((l) => {
             const cls = "text-muted-foreground hover:text-primary transition-colors duration-300 text-sm font-body";
-            return l.href.startsWith("/") ? (
-              <Link key={l.href} to={l.href} className={cls}>{l.label}</Link>
-            ) : (
-              <a key={l.href} href={l.href} className={cls}>{l.label}</a>
-            );
+            if (l.href.includes("#")) {
+              return <a key={l.href} href={l.href} className={cls}>{l.label}</a>;
+            }
+            return <Link key={l.href} to={l.href} className={cls}>{l.label}</Link>;
           })}
         </div>
 
