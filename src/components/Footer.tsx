@@ -4,6 +4,7 @@ const links = [
   { label: "AckiScan", href: "https://ackiscan.com" },
   { label: "Contact", href: "/contact" },
   { label: "Terms of Service", href: "/terms" },
+  { label: "Privacy Policy", href: "/privacy" },
 ];
 
 export default function Footer() {
