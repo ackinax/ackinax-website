@@ -5,9 +5,12 @@ export default function NodesSection() {
     ref,
     isVisible
   } = useScrollReveal();
-  return <section id="nodes" className="relative py-24 px-6">
-      <div className="max-w-[900px] mx-auto">
-        <div ref={ref} className="">
+  return <section id="nodes" className="relative py-28 px-6">
+      {/* Decorative glow */}
+      <div className="absolute top-1/2 left-1/3 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full opacity-[0.08] blur-[140px] pointer-events-none" style={{ background: "hsl(29 88% 67%)" }} />
+
+      <div className="relative z-10 max-w-[900px] mx-auto">
+        <div ref={ref} className={`rounded-2xl border border-primary/10 bg-card/40 backdrop-blur-sm p-8 md:p-12 ${isVisible ? "animate-fade-slide-up" : "opacity-0"}`}>
           <p className="section-label mb-3">NODE INFRASTRUCTURE</p>
           <h2 className="font-heading text-3xl md:text-4xl font-bold text-foreground tracking-tight mb-4">
             Block Keeper nodes, fully managed
