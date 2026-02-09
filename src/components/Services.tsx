@@ -56,7 +56,7 @@ function Card({
   } = useScrollReveal(0.15);
   const isSoon = card.status === "COMING SOON";
   const colors = statusColor(card.status);
-  const gradientColor = card.status === "LIVE" ? "hsl(160 60% 45%)" : "hsl(29 88% 67%)";
+  const gradientColor = (card.status === "LIVE" || card.status === "ACTIVE") ? "hsl(160 60% 45%)" : "hsl(29 88% 67%)";
   return <div ref={ref} className={`card-base relative overflow-hidden transition-all duration-500 ${isVisible ? "animate-fade-slide-up" : "opacity-0"} ${isSoon ? "opacity-50 cursor-default" : "group cursor-pointer"}`} style={{
     animationDelay: `${index * 100}ms`
   }}>
