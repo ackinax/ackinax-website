@@ -61,7 +61,7 @@ serve(async (req) => {
         To: "talk@ackinax.com",
         Subject: `[Website Contact] ${subject}`,
         ReplyTo: email,
-        MessageStream: "general-ackinax",
+        MessageStream: "outbound",
         LayoutTemplate: "basic",
         HtmlBody: `
           <h2>New Contact Form Submission</h2>
