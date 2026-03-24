@@ -57,7 +57,7 @@ serve(async (req) => {
       method: "POST",
       headers,
       body: JSON.stringify({
-        From: "Ackinax Contact <talk@ackinax.com>",
+        From: "Ackinax Contact <contact@syks.co>",
         To: "talk@ackinax.com",
         Subject: `[Website Contact] ${subject}`,
         ReplyTo: email,
