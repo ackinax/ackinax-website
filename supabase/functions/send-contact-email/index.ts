@@ -59,7 +59,7 @@ serve(async (req) => {
       body: JSON.stringify({
         From: "Ackinax Contact <talk@ackinax.com>",
         To: "talk@ackinax.com",
-        Subject: `[Contact Form] ${subject}`,
+        Subject: `[Website Contact] ${subject}`,
         ReplyTo: email,
         MessageStream: "general-ackinax",
         LayoutTemplate: "basic",
