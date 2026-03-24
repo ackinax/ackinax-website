@@ -80,7 +80,7 @@ serve(async (req) => {
       method: "POST",
       headers,
       body: JSON.stringify({
-        From: "Ackinax <talk@ackinax.com>",
+        From: "Ackinax <contact@syks.co>",
         To: email,
         Subject: "We received your message",
         MessageStream: "outbound",
