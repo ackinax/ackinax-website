@@ -57,7 +57,7 @@ serve(async (req) => {
       method: "POST",
       headers,
       body: JSON.stringify({
-        From: "Ackinax Contact <talk@ackinax.com>",
+        From: "Ackinax Contact <contact@syks.co>",
         To: "talk@ackinax.com",
         Subject: `[Website Contact] ${subject}`,
         ReplyTo: email,
@@ -80,7 +80,7 @@ serve(async (req) => {
       method: "POST",
       headers,
       body: JSON.stringify({
-        From: "Ackinax <talk@ackinax.com>",
+        From: "Ackinax <contact@syks.co>",
         To: email,
         Subject: "We received your message",
         MessageStream: "outbound",
