@@ -19,8 +19,8 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
+        <GoogleAnalytics />
         <Routes>
-          <GoogleAnalytics />
           <Route path="/" element={<Index />} />
           <Route path="/nodes" element={<Nodes />} />
           <Route path="/contact" element={<Contact />} />
