@@ -26,11 +26,11 @@ export default {
   				'monospace'
   			],
   			heading: [
-  				'Space Grotesk"',
+  				'"Space Grotesk"',
   				'sans-serif'
   			],
   			body: [
-  				'IBM Plex Sans"',
+  				'"IBM Plex Sans"',
   				'sans-serif'
   			],
   			sans: [
