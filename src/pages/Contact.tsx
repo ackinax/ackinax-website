@@ -6,7 +6,6 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
 import { Loader2 } from "lucide-react";
 
 const contactSchema = z.object({
@@ -43,10 +42,13 @@ export default function Contact() {
     }
     setLoading(true);
     try {
-      const { data, error } = await supabase.functions.invoke("send-contact-email", {
-        body: result.data,
+      const res = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(result.data),
       });
-      if (error) throw error;
+      const data = (await res.json().catch(() => null)) as { success?: boolean } | null;
+      if (!res.ok || !data?.success) throw new Error("Request failed");
       toast({ title: "Message sent", description: "Thanks for reaching out — we'll be in touch soon." });
       setForm({ name: "", email: "", subject: "", message: "" });
     } catch {
