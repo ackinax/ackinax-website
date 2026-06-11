@@ -1,20 +1,20 @@
 /**
  * Cloudflare Worker entry. Serves the built SPA through the ASSETS binding and
- * handles the site's form endpoints by posting to Slack Incoming Webhooks:
+ * handles the site's form endpoints:
  *
- *   POST /api/rpc-lead  → SLACK_RPC_WEBHOOK_URL
- *   POST /api/contact   → SLACK_CONTACT_WEBHOOK_URL
+ *   POST /api/rpc-lead  (source: RPC endpoint)
+ *   POST /api/contact   (source: Contact form)
  *
- * Webhook URLs stay server-side (Worker secrets). When one is unset its route
- * returns 503 so the form can fall back to email. Routing is configured in
- * wrangler.jsonc via `run_worker_first: ["/api/*"]`, so asset and SPA routes
- * never hit this script.
+ * Both post to a single Slack Incoming Webhook (SLACK_WEBHOOK_URL); each message
+ * carries a Source line so one channel can tell them apart. The URL stays
+ * server-side (Worker secret); when unset the routes return 503 so forms fall
+ * back to email. Routing is configured in wrangler.jsonc via
+ * `run_worker_first: ["/api/*"]`, so asset and SPA routes never hit this script.
  */
 
 interface Env {
   ASSETS: { fetch(request: Request): Promise<Response> };
-  SLACK_RPC_WEBHOOK_URL?: string;
-  SLACK_CONTACT_WEBHOOK_URL?: string;
+  SLACK_WEBHOOK_URL?: string;
 }
 
 interface RpcLead {
@@ -88,7 +88,7 @@ function buildRpcLeadMessage(lead: RpcLead) {
     blocks: [
       { type: "section", text: { type: "mrkdwn", text: `🛰️ *New RPC endpoint lead*\n${lead.message}` } },
       { type: "section", text: { type: "mrkdwn", text: facts } },
-      { type: "context", elements: [{ type: "mrkdwn", text: `From: ${sender}` }] },
+      { type: "context", elements: [{ type: "mrkdwn", text: `From: ${sender}  ·  Source: RPC endpoint (\`/rpc\`)` }] },
     ],
   };
 }
@@ -98,13 +98,16 @@ function buildContactMessage(c: ContactMessage) {
     text: `Contact message — ${c.name}`,
     blocks: [
       { type: "section", text: { type: "mrkdwn", text: `✉️ *${c.subject}*\n${c.message}` } },
-      { type: "context", elements: [{ type: "mrkdwn", text: `From: ${c.name} <${c.email}>` }] },
+      {
+        type: "context",
+        elements: [{ type: "mrkdwn", text: `From: ${c.name} <${c.email}>  ·  Source: Contact form (\`/contact\`)` }],
+      },
     ],
   };
 }
 
 async function handleRpcLead(request: Request, env: Env): Promise<Response> {
-  const blocked = precheck(request, env.SLACK_RPC_WEBHOOK_URL, "rpc-lead");
+  const blocked = precheck(request, env.SLACK_WEBHOOK_URL, "rpc-lead");
   if (blocked) return blocked;
 
   let body: RpcLead;
@@ -128,12 +131,12 @@ async function handleRpcLead(request: Request, env: Env): Promise<Response> {
     message: body.message.trim().slice(0, 2000),
   };
 
-  const ok = await postToSlack(env.SLACK_RPC_WEBHOOK_URL!, buildRpcLeadMessage(lead));
+  const ok = await postToSlack(env.SLACK_WEBHOOK_URL!, buildRpcLeadMessage(lead));
   return ok ? json({ success: true }) : json({ error: "Failed to deliver lead" }, 502);
 }
 
 async function handleContact(request: Request, env: Env): Promise<Response> {
-  const blocked = precheck(request, env.SLACK_CONTACT_WEBHOOK_URL, "contact");
+  const blocked = precheck(request, env.SLACK_WEBHOOK_URL, "contact");
   if (blocked) return blocked;
 
   let body: ContactMessage;
@@ -155,7 +158,7 @@ async function handleContact(request: Request, env: Env): Promise<Response> {
     message: body.message.trim().slice(0, 2000),
   };
 
-  const ok = await postToSlack(env.SLACK_CONTACT_WEBHOOK_URL!, buildContactMessage(contact));
+  const ok = await postToSlack(env.SLACK_WEBHOOK_URL!, buildContactMessage(contact));
   return ok ? json({ success: true }) : json({ error: "Failed to deliver message" }, 502);
 }
 
