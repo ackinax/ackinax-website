@@ -4,6 +4,8 @@ import logo from "@/assets/Logo_V2_T-2.svg";
 import { Link, useNavigate } from "react-router-dom";
 
 const navLinks: { label: string; href: string }[] = [
+  { label: "RPC", href: "/rpc" },
+  { label: "Nodes", href: "/nodes" },
   { label: "Contact", href: "/contact" },
 ];
 

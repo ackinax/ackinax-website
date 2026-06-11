@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import GoogleAnalytics from "./components/GoogleAnalytics";
 import Index from "./pages/Index";
 import Nodes from "./pages/Nodes";
+import Rpc from "./pages/Rpc";
 import Contact from "./pages/Contact";
 import TermsOfService from "./pages/TermsOfService";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
@@ -23,6 +24,7 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/nodes" element={<Nodes />} />
+          <Route path="/rpc" element={<Rpc />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/terms" element={<TermsOfService />} />
           <Route path="/privacy" element={<PrivacyPolicy />} />
