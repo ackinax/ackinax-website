@@ -4,10 +4,10 @@ import { z } from "zod";
 export const FALLBACK_EMAIL = "talk@ackinax.com";
 
 export const TIER_OPTIONS = [
-  "Starter — shared RPC",
+  "Starter — shared endpoint",
   "Commercial — dedicated endpoint",
-  "Dedicated / Managed",
-  "Run my Block Manager license",
+  "Dedicated / Managed — fully managed",
+  "Managed Block Manager hosting",
   "Not sure yet",
 ] as const;
 

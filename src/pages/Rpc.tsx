@@ -61,43 +61,49 @@ const whyCards = [
 const tiers = [
   {
     name: "Starter",
+    tag: "Shared endpoint",
     price: "from $250",
     cadence: "/mo",
-    blurb: "Active miners and small bot teams.",
+    blurb: "Devs, bots and mini-apps that need reliable access without running a node.",
     features: [
+      "Direct Block-Keeper routing · no WAF · native indexed data",
       "Shared high-availability endpoint",
+      "Bundled requests · 50–100 RPS",
       "IP / domain whitelisting",
-      "Up to 1–2 TB monthly egress",
-      "50–100 RPS",
+      "Up to 1–2 TB egress / month",
       "Email support",
     ],
     featured: false,
   },
   {
     name: "Commercial",
+    tag: "Dedicated endpoint",
     price: "from $1,500",
     cadence: "/mo",
-    blurb: "Mini-apps, commercial node services, heavy operations.",
+    blurb: "Production apps, market makers and commercial operators that need isolated throughput.",
     features: [
-      "Dedicated endpoint URL",
-      "No Cloudflare WAF friction",
-      "5–10 TB monthly egress",
+      "Direct Block-Keeper routing · no WAF · native indexed data",
+      "Dedicated endpoint — isolated throughput",
       "200+ RPS sustained, bursting higher",
-      "99.9% uptime SLA · priority support",
+      "5–10 TB egress / month",
+      "99.9% uptime SLA",
+      "Priority support",
     ],
     featured: true,
   },
   {
     name: "Dedicated / Managed",
+    tag: "Dedicated + fully managed",
     price: "Let's talk",
     cadence: "",
-    blurb: "Institutional scale and whitelabel platforms.",
+    blurb: "AI-agent platforms, institutional desks and teams running a Block Manager.",
     features: [
+      "Direct Block-Keeper routing · no WAF · native indexed data",
       "Fully-managed dedicated infrastructure",
       "Custom firewall rules & dedicated IPs",
-      "Unthrottled indexed-data access",
+      "Guaranteed unthrottled throughput",
       "Custom egress & concurrency",
-      "Hands-on onboarding",
+      "Managed Block Manager option · hands-on onboarding",
     ],
     featured: false,
   },
@@ -134,6 +140,15 @@ export default function Rpc() {
       {/* Grid background */}
       <div className="fixed inset-0 grid-bg pointer-events-none" />
 
+      {/* Veil that mutes the grid for legibility — strongest at the top, light wash below. One layer, so no per-section seams. */}
+      <div
+        className="absolute inset-0 z-0 pointer-events-none"
+        style={{
+          background:
+            "linear-gradient(to bottom, hsl(var(--background)) 0%, hsl(var(--background) / 0.92) 4%, hsl(var(--background) / 0.5) 12%, hsl(var(--background) / 0.5) 100%)",
+        }}
+      />
+
       {/* Glow orbs */}
       <div
         className="fixed top-[-200px] left-[-100px] w-[600px] h-[600px] rounded-full opacity-[0.08] pointer-events-none"
@@ -147,8 +162,8 @@ export default function Rpc() {
       <Navbar />
 
       {/* ─── 1. Hero ─── */}
-      <section className="pt-32 pb-16 px-6">
-        <div className="max-w-[1100px] mx-auto" ref={heroRef}>
+      <section className="relative z-10 pt-32 pb-16 px-6">
+        <div className="relative z-10 max-w-[1100px] mx-auto" ref={heroRef}>
           <div className={`max-w-[760px] ${heroVis ? "animate-fade-slide-up" : "opacity-0"}`}>
             <div
               className="inline-flex items-center gap-2.5 px-4 py-2 rounded-full border mb-6"
@@ -176,8 +191,8 @@ export default function Rpc() {
       </section>
 
       {/* ─── 2. Credibility stat bar ─── */}
-      <section className="pb-20 px-6">
-        <div className="max-w-[1100px] mx-auto">
+      <section className="relative z-10 pb-20 px-6">
+        <div className="relative z-10 max-w-[1100px] mx-auto">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {stats.map((s) => (
               <div
@@ -194,8 +209,8 @@ export default function Rpc() {
       </section>
 
       {/* ─── 3. Why native ─── */}
-      <section className="py-20 px-6">
-        <div className="max-w-[1100px] mx-auto" ref={whyRef}>
+      <section className="relative z-10 py-20 px-6">
+        <div className="relative z-10 max-w-[1100px] mx-auto" ref={whyRef}>
           <div className={`${whyVis ? "animate-fade-slide-up" : "opacity-0"}`}>
             <p className="section-label mb-3 text-center">WHY NATIVE INFRASTRUCTURE</p>
             <h2 className="font-heading text-3xl md:text-4xl font-bold text-foreground tracking-tight mb-3 text-center">
@@ -225,16 +240,17 @@ export default function Rpc() {
       </section>
 
       {/* ─── 4. Pricing ─── */}
-      <section id="pricing" className="py-20 px-6">
-        <div className="max-w-[1100px] mx-auto" ref={priceRef}>
+      <section id="pricing" className="relative z-10 py-20 px-6">
+        <div className="relative z-10 max-w-[1100px] mx-auto" ref={priceRef}>
           <div className={`${priceVis ? "animate-fade-slide-up" : "opacity-0"}`}>
             <p className="section-label mb-3 text-center">PRICING</p>
             <h2 className="font-heading text-3xl md:text-4xl font-bold text-foreground tracking-tight mb-3 text-center">
-              One ladder, from first bot to full scale
+              From first call to full scale
             </h2>
-            <p className="font-body text-sm text-muted-foreground text-center max-w-[600px] mx-auto mb-12">
-              Bundled per-request pricing — pay for throughput, not per-method multipliers. Final quote is shaped to your
-              volume and egress.
+            <p className="font-body text-sm text-muted-foreground text-center max-w-[620px] mx-auto mb-12">
+              Start on a shared endpoint and move to dedicated infrastructure as you grow — whether you're a mini-app, a
+              market maker, an AI-agent platform on the DEX, or a commercial operator. Bundled per-request pricing: you pay
+              for throughput, not per-method multipliers.
             </p>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
@@ -257,6 +273,9 @@ export default function Rpc() {
                     </span>
                   )}
                   <p className="section-label mb-2">{t.name}</p>
+                  <span className="inline-block font-mono-brand text-[10px] uppercase tracking-[0.08em] px-2.5 py-1 rounded-full border border-border text-muted-foreground mb-4">
+                    {t.tag}
+                  </span>
                   <div className="mb-2">
                     <span className="font-heading text-4xl font-bold text-foreground">{t.price}</span>
                     <span className="font-body text-muted-foreground ml-1">{t.cadence}</span>
@@ -284,8 +303,8 @@ export default function Rpc() {
       </section>
 
       {/* ─── 5. Comparison ─── */}
-      <section className="py-20 px-6">
-        <div className="max-w-[900px] mx-auto" ref={compRef}>
+      <section className="relative z-10 py-20 px-6">
+        <div className="relative z-10 max-w-[900px] mx-auto" ref={compRef}>
           <div className={`${compVis ? "animate-fade-slide-up" : "opacity-0"}`}>
             <p className="section-label mb-3 text-center">HOW WE COMPARE</p>
             <h2 className="font-heading text-3xl md:text-4xl font-bold text-foreground tracking-tight mb-12 text-center">
@@ -329,8 +348,8 @@ export default function Rpc() {
       </section>
 
       {/* ─── 6. Quickstart ─── */}
-      <section className="py-20 px-6">
-        <div className="max-w-[1100px] mx-auto" ref={startRef}>
+      <section className="relative z-10 py-20 px-6">
+        <div className="relative z-10 max-w-[1100px] mx-auto" ref={startRef}>
           <div className={`${startVis ? "animate-fade-slide-up" : "opacity-0"}`}>
             <p className="section-label mb-3 text-center">GETTING STARTED</p>
             <h2 className="font-heading text-3xl md:text-4xl font-bold text-foreground tracking-tight mb-12 text-center">
@@ -351,17 +370,21 @@ export default function Rpc() {
               <p className="font-body text-xs text-muted-foreground mb-2 text-center">Your dedicated endpoint</p>
               <div className="rounded-lg border border-border bg-card px-5 py-4 text-center">
                 <code className="font-mono-brand text-sm text-primary break-all">
-                  https://rpc.ackinax.com/v1/&lt;your-key&gt;
+                  https://&lt;your-team&gt;.rpc.ackinax.com
                 </code>
               </div>
+              <p className="font-body text-xs text-muted-foreground mt-2 text-center">
+                Access is allowlisted at the network layer — your IPs and domains, enforced at our firewall. Nothing
+                shared, no key to leak, no public rate-limit pool.
+              </p>
             </div>
           </div>
         </div>
       </section>
 
       {/* ─── 7. Managed Block Manager ─── */}
-      <section className="py-20 px-6">
-        <div className="max-w-[800px] mx-auto" ref={bmRef}>
+      <section className="relative z-10 py-20 px-6">
+        <div className="relative z-10 max-w-[800px] mx-auto" ref={bmRef}>
           <div className={`${bmVis ? "animate-fade-slide-up" : "opacity-0"}`}>
             <div className="card-base text-center">
               <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mx-auto mb-5">
@@ -381,8 +404,8 @@ export default function Rpc() {
       </section>
 
       {/* ─── 8. Request form ─── */}
-      <section id="request" className="py-20 px-6 scroll-mt-24">
-        <div className="max-w-[720px] mx-auto" ref={formRef}>
+      <section id="request" className="relative z-10 py-20 px-6 scroll-mt-24">
+        <div className="relative z-10 max-w-[720px] mx-auto" ref={formRef}>
           <div className={`${formVis ? "animate-fade-slide-up" : "opacity-0"}`}>
             <p className="section-label mb-3 text-center">REQUEST ACCESS</p>
             <h2 className="font-heading text-3xl md:text-4xl font-bold text-foreground tracking-tight mb-3 text-center">

@@ -75,10 +75,10 @@ export default function RpcLeadForm({ defaultTier = "", id }: { defaultTier?: st
       </div>
 
       <div className="grid sm:grid-cols-2 gap-5">
-        <LeadField label="Project / company" error={errors.project}>
+        <LeadField label="Project / company" error={errors.project} optional>
           <Input value={form.project} onChange={(e) => update("project", e.target.value)} placeholder="What are you building?" maxLength={120} />
         </LeadField>
-        <LeadField label="Tier of interest" error={errors.tier}>
+        <LeadField label="Tier of interest" error={errors.tier} optional>
           <select
             value={form.tier}
             onChange={(e) => update("tier", e.target.value)}
@@ -92,7 +92,7 @@ export default function RpcLeadForm({ defaultTier = "", id }: { defaultTier?: st
         </LeadField>
       </div>
 
-      <LeadField label="Expected volume (RPS or requests/month)" error={errors.volume}>
+      <LeadField label="Expected volume (RPS or requests/month)" error={errors.volume} optional>
         <Input value={form.volume} onChange={(e) => update("volume", e.target.value)} placeholder="e.g. ~150 RPS sustained, or 200M req/mo" maxLength={120} />
       </LeadField>
 
@@ -114,10 +114,23 @@ export default function RpcLeadForm({ defaultTier = "", id }: { defaultTier?: st
   );
 }
 
-function LeadField({ label, error, children }: { label: string; error?: string; children: React.ReactNode }) {
+function LeadField({
+  label,
+  error,
+  optional,
+  children,
+}: {
+  label: string;
+  error?: string;
+  optional?: boolean;
+  children: React.ReactNode;
+}) {
   return (
     <div className="space-y-1.5">
-      <Label className="font-body text-sm text-foreground">{label}</Label>
+      <Label className="font-body text-sm text-foreground">
+        {label}
+        {optional && <span className="text-muted-foreground font-normal"> (optional)</span>}
+      </Label>
       {children}
       {error && <p className="text-destructive text-xs font-body">{error}</p>}
     </div>
