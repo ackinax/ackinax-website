@@ -3,7 +3,6 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
 import { FALLBACK_EMAIL, TIER_OPTIONS, rpcLeadSchema, type RpcLead } from "@/lib/rpcLead";
 import { Loader2 } from "lucide-react";
 
@@ -35,8 +34,13 @@ export default function RpcLeadForm({ defaultTier = "", id }: { defaultTier?: st
     }
     setLoading(true);
     try {
-      const { error } = await supabase.functions.invoke("send-rpc-lead", { body: result.data });
-      if (error) throw error;
+      const res = await fetch("/api/rpc-lead", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(result.data),
+      });
+      const data = (await res.json().catch(() => null)) as { success?: boolean } | null;
+      if (!res.ok || !data?.success) throw new Error("Request failed");
       setSent(true);
       setForm({ ...EMPTY, tier: defaultTier });
       toast({ title: "Request received", description: "We'll be in touch shortly to get your endpoint live." });
