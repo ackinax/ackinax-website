@@ -6,7 +6,7 @@ import { useToast } from "@/hooks/use-toast";
 import { FALLBACK_EMAIL, TIER_OPTIONS, rpcLeadSchema, type RpcLead } from "@/lib/rpcLead";
 import { Loader2 } from "lucide-react";
 
-const EMPTY: RpcLead = { name: "", email: "", project: "", tier: "", volume: "", message: "" };
+const EMPTY: RpcLead = { name: "", email: "", telegram: "", phone: "", project: "", tier: "", volume: "", message: "" };
 
 export default function RpcLeadForm({ defaultTier = "", id }: { defaultTier?: string; id?: string }) {
   const { toast } = useToast();
@@ -69,12 +69,32 @@ export default function RpcLeadForm({ defaultTier = "", id }: { defaultTier?: st
 
   return (
     <form id={id} onSubmit={handleSubmit} className="card-base space-y-5">
+      <LeadField label="Use case" error={errors.message}>
+        <Textarea
+          value={form.message}
+          onChange={(e) => update("message", e.target.value)}
+          placeholder="Bots, mini-app, market making, AI agents on the DEX, getting blocked by Cloudflare…"
+          rows={4}
+          maxLength={2000}
+        />
+      </LeadField>
+
+      <p className="font-body text-xs text-muted-foreground -mb-1">How should we reach you? Email, plus any you prefer.</p>
       <div className="grid sm:grid-cols-2 gap-5">
-        <LeadField label="Name" error={errors.name}>
-          <Input value={form.name} onChange={(e) => update("name", e.target.value)} placeholder="Your name" maxLength={100} />
-        </LeadField>
         <LeadField label="Email" error={errors.email}>
           <Input type="email" value={form.email} onChange={(e) => update("email", e.target.value)} placeholder="you@example.com" maxLength={255} />
+        </LeadField>
+        <LeadField label="Telegram" error={errors.telegram} optional>
+          <Input value={form.telegram} onChange={(e) => update("telegram", e.target.value)} placeholder="@username" maxLength={64} />
+        </LeadField>
+      </div>
+
+      <div className="grid sm:grid-cols-2 gap-5">
+        <LeadField label="Phone" error={errors.phone} optional>
+          <Input type="tel" value={form.phone} onChange={(e) => update("phone", e.target.value)} placeholder="+1 555 000 0000" maxLength={32} />
+        </LeadField>
+        <LeadField label="Name" error={errors.name}>
+          <Input value={form.name} onChange={(e) => update("name", e.target.value)} placeholder="Your name" maxLength={100} />
         </LeadField>
       </div>
 
@@ -98,16 +118,6 @@ export default function RpcLeadForm({ defaultTier = "", id }: { defaultTier?: st
 
       <LeadField label="Expected volume (RPS or requests/month)" error={errors.volume} optional>
         <Input value={form.volume} onChange={(e) => update("volume", e.target.value)} placeholder="e.g. ~150 RPS sustained, or 200M req/mo" maxLength={120} />
-      </LeadField>
-
-      <LeadField label="Use case" error={errors.message}>
-        <Textarea
-          value={form.message}
-          onChange={(e) => update("message", e.target.value)}
-          placeholder="Bots, mini-app, market making, AI agents on the DEX, getting blocked by Cloudflare…"
-          rows={4}
-          maxLength={2000}
-        />
       </LeadField>
 
       <button type="submit" disabled={loading} className="btn-primary w-full flex items-center justify-center gap-2">

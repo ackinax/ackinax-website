@@ -20,6 +20,8 @@ interface Env {
 interface RpcLead {
   name: string;
   email: string;
+  telegram?: string;
+  phone?: string;
   project?: string;
   tier?: string;
   volume?: string;
@@ -29,6 +31,8 @@ interface RpcLead {
 interface ContactMessage {
   name: string;
   email: string;
+  telegram?: string;
+  phone?: string;
   message: string;
 }
 
@@ -75,9 +79,11 @@ function precheck(request: Request, webhook: string | undefined, key: string): R
 function buildRpcLeadMessage(lead: RpcLead) {
   const sender = lead.project?.trim() ? `${lead.name} · ${lead.project.trim()}` : lead.name;
   const facts = [
-    lead.tier?.trim() ? `*Tier:* ${lead.tier.trim()}` : null,
-    lead.volume?.trim() ? `*Expected volume:* ${lead.volume.trim()}` : null,
     `*Email:* ${lead.email}`,
+    lead.telegram ? `*Telegram:* ${lead.telegram}` : null,
+    lead.phone ? `*Phone:* ${lead.phone}` : null,
+    lead.tier ? `*Tier:* ${lead.tier}` : null,
+    lead.volume ? `*Expected volume:* ${lead.volume}` : null,
   ]
     .filter(Boolean)
     .join("\n");
@@ -93,14 +99,20 @@ function buildRpcLeadMessage(lead: RpcLead) {
 }
 
 function buildContactMessage(c: ContactMessage) {
+  const channels = [
+    `*Email:* ${c.email}`,
+    c.telegram ? `*Telegram:* ${c.telegram}` : null,
+    c.phone ? `*Phone:* ${c.phone}` : null,
+  ]
+    .filter(Boolean)
+    .join("\n");
+
   return {
     text: `Contact message — ${c.name}`,
     blocks: [
       { type: "section", text: { type: "mrkdwn", text: `✉️ *New contact message*\n${c.message}` } },
-      {
-        type: "context",
-        elements: [{ type: "mrkdwn", text: `From: ${c.name} <${c.email}>  ·  Source: Contact form (\`/contact\`)` }],
-      },
+      { type: "section", text: { type: "mrkdwn", text: channels } },
+      { type: "context", elements: [{ type: "mrkdwn", text: `From: ${c.name}  ·  Source: Contact form (\`/contact\`)` }] },
     ],
   };
 }
@@ -124,6 +136,8 @@ async function handleRpcLead(request: Request, env: Env): Promise<Response> {
   const lead: RpcLead = {
     name: body.name.trim().slice(0, 100),
     email: body.email.trim().slice(0, 255),
+    telegram: body.telegram?.trim().slice(0, 64),
+    phone: body.phone?.trim().slice(0, 32),
     project: body.project?.trim().slice(0, 120),
     tier: body.tier?.trim().slice(0, 80),
     volume: body.volume?.trim().slice(0, 120),
@@ -153,6 +167,8 @@ async function handleContact(request: Request, env: Env): Promise<Response> {
   const contact: ContactMessage = {
     name: body.name.trim().slice(0, 100),
     email: body.email.trim().slice(0, 255),
+    telegram: body.telegram?.trim().slice(0, 64),
+    phone: body.phone?.trim().slice(0, 32),
     message: body.message.trim().slice(0, 2000),
   };
 

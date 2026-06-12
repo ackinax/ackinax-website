@@ -8,9 +8,11 @@ describe("rpcLeadSchema", () => {
     expect(rpcLeadSchema.safeParse(valid).success).toBe(true);
   });
 
-  it("accepts optional project, tier and volume", () => {
+  it("accepts optional channels and details", () => {
     const result = rpcLeadSchema.safeParse({
       ...valid,
+      telegram: "@ada",
+      phone: "+1 555 000 0000",
       project: "Mini-app",
       tier: TIER_OPTIONS[0],
       volume: "150 RPS",

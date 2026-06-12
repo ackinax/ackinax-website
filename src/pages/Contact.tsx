@@ -11,6 +11,8 @@ import { Loader2 } from "lucide-react";
 const contactSchema = z.object({
   name: z.string().trim().min(1, "Name is required").max(100, "Name must be under 100 characters"),
   email: z.string().trim().email("Invalid email address").max(255, "Email must be under 255 characters"),
+  telegram: z.string().trim().max(64, "Keep this under 64 characters").optional(),
+  phone: z.string().trim().max(32, "Keep this under 32 characters").optional(),
   message: z.string().trim().min(1, "Message is required").max(2000, "Message must be under 2000 characters"),
 });
 
@@ -19,7 +21,7 @@ type ContactForm = z.infer<typeof contactSchema>;
 export default function Contact() {
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
-  const [form, setForm] = useState<ContactForm>({ name: "", email: "", message: "" });
+  const [form, setForm] = useState<ContactForm>({ name: "", email: "", telegram: "", phone: "", message: "" });
   const [errors, setErrors] = useState<Partial<Record<keyof ContactForm, string>>>({});
 
   const handleChange = (field: keyof ContactForm, value: string) => {
@@ -49,7 +51,7 @@ export default function Contact() {
       const data = (await res.json().catch(() => null)) as { success?: boolean } | null;
       if (!res.ok || !data?.success) throw new Error("Request failed");
       toast({ title: "Message sent", description: "Thanks for reaching out — we'll be in touch soon." });
-      setForm({ name: "", email: "", message: "" });
+      setForm({ name: "", email: "", telegram: "", phone: "", message: "" });
     } catch {
       toast({ title: "Something went wrong", description: "Please try again later.", variant: "destructive" });
     } finally {
@@ -78,23 +80,6 @@ export default function Contact() {
           </p>
 
           <form onSubmit={handleSubmit} className="space-y-5">
-            <Field label="Name" error={errors.name}>
-              <Input
-                value={form.name}
-                onChange={(e) => handleChange("name", e.target.value)}
-                placeholder="Your name"
-                maxLength={100}
-              />
-            </Field>
-            <Field label="Email" error={errors.email}>
-              <Input
-                type="email"
-                value={form.email}
-                onChange={(e) => handleChange("email", e.target.value)}
-                placeholder="you@example.com"
-                maxLength={255}
-              />
-            </Field>
             <Field label="Message" error={errors.message}>
               <Textarea
                 value={form.message}
@@ -104,6 +89,47 @@ export default function Contact() {
                 maxLength={2000}
               />
             </Field>
+
+            <p className="font-body text-xs text-muted-foreground -mb-1">How should we reach you? Email, plus any you prefer.</p>
+            <div className="grid sm:grid-cols-2 gap-5">
+              <Field label="Email" error={errors.email}>
+                <Input
+                  type="email"
+                  value={form.email}
+                  onChange={(e) => handleChange("email", e.target.value)}
+                  placeholder="you@example.com"
+                  maxLength={255}
+                />
+              </Field>
+              <Field label="Telegram" error={errors.telegram} optional>
+                <Input
+                  value={form.telegram}
+                  onChange={(e) => handleChange("telegram", e.target.value)}
+                  placeholder="@username"
+                  maxLength={64}
+                />
+              </Field>
+            </div>
+
+            <div className="grid sm:grid-cols-2 gap-5">
+              <Field label="Phone" error={errors.phone} optional>
+                <Input
+                  type="tel"
+                  value={form.phone}
+                  onChange={(e) => handleChange("phone", e.target.value)}
+                  placeholder="+1 555 000 0000"
+                  maxLength={32}
+                />
+              </Field>
+              <Field label="Name" error={errors.name}>
+                <Input
+                  value={form.name}
+                  onChange={(e) => handleChange("name", e.target.value)}
+                  placeholder="Your name"
+                  maxLength={100}
+                />
+              </Field>
+            </div>
 
             <button type="submit" disabled={loading} className="btn-primary w-full flex items-center justify-center gap-2">
               {loading && <Loader2 className="h-4 w-4 animate-spin" />}
@@ -118,10 +144,23 @@ export default function Contact() {
   );
 }
 
-function Field({ label, error, children }: { label: string; error?: string; children: React.ReactNode }) {
+function Field({
+  label,
+  error,
+  optional,
+  children,
+}: {
+  label: string;
+  error?: string;
+  optional?: boolean;
+  children: React.ReactNode;
+}) {
   return (
     <div className="space-y-1.5">
-      <Label className="font-body text-sm text-foreground">{label}</Label>
+      <Label className="font-body text-sm text-foreground">
+        {label}
+        {optional && <span className="text-muted-foreground font-normal"> (optional)</span>}
+      </Label>
       {children}
       {error && <p className="text-destructive text-xs font-body">{error}</p>}
     </div>

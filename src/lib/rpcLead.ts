@@ -14,6 +14,8 @@ export const TIER_OPTIONS = [
 export const rpcLeadSchema = z.object({
   name: z.string().trim().min(1, "Name is required").max(100, "Name must be under 100 characters"),
   email: z.string().trim().email("Invalid email address").max(255, "Email must be under 255 characters"),
+  telegram: z.string().trim().max(64, "Keep this under 64 characters").optional(),
+  phone: z.string().trim().max(32, "Keep this under 32 characters").optional(),
   project: z.string().trim().max(120, "Keep this under 120 characters").optional(),
   tier: z.string().trim().max(80).optional(),
   volume: z.string().trim().max(120, "Keep this under 120 characters").optional(),
