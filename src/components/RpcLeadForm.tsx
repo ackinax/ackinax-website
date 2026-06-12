@@ -60,8 +60,8 @@ export default function RpcLeadForm({ defaultTier = "", id }: { defaultTier?: st
       <div id={id} className="card-base text-center">
         <h3 className="font-heading text-xl font-semibold text-foreground mb-2">Thanks — request received</h3>
         <p className="font-body text-sm text-muted-foreground">
-          We'll reach out shortly to whitelist your traffic and get your endpoint live. Prefer email?{" "}
-          <a href={`mailto:${FALLBACK_EMAIL}`} className="text-primary hover:underline">{FALLBACK_EMAIL}</a>
+          We'll reach out shortly to get you live. Feel free to reach out by email{" "}
+          <a href={`mailto:${FALLBACK_EMAIL}`} className="text-primary hover:underline">{FALLBACK_EMAIL}</a>.
         </p>
       </div>
     );
