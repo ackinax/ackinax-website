@@ -68,7 +68,11 @@ export default function Contact() {
       toast({ title: "Message sent", description: "Thanks for reaching out — we'll be in touch soon." });
       setForm({ name: "", email: "", telegram: "", phone: "", message: "" });
     } catch {
-      toast({ title: "Something went wrong", description: "Please try again later.", variant: "destructive" });
+      toast({
+        title: "Couldn't send that",
+        description: "Please email us directly at talk@ackinax.com.",
+        variant: "destructive",
+      });
     } finally {
       setLoading(false);
     }
