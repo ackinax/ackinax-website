@@ -16,8 +16,8 @@ import {
 } from "lucide-react";
 
 /* ─── Credibility stats ─── */
-const stats = [
-  { value: "59", label: "Block Keeper nodes we run" },
+const stats: { value: string; label: string; sub?: string }[] = [
+  { value: "55+", label: "BK nodes", sub: "a significant part of the network" },
   { value: "0ms", label: "rate limit on indexed data" },
   { value: "99.9%", label: "uptime SLA" },
   { value: "250", label: "parallel threads supported" },
@@ -202,6 +202,7 @@ export default function Rpc() {
               >
                 <p className="font-heading text-3xl md:text-4xl font-bold text-primary mb-2">{s.value}</p>
                 <p className="font-body text-xs text-muted-foreground leading-snug">{s.label}</p>
+                {s.sub && <p className="font-body text-[10px] text-muted-foreground/70 leading-snug mt-1">{s.sub}</p>}
               </div>
             ))}
           </div>
