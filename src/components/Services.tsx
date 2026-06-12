@@ -19,7 +19,7 @@ const cards: ServiceCard[] = [{
 }, {
   icon: "⚡",
   title: "RPC Endpoints",
-  description: "Dedicated RPC straight from the core network — we run a third of Acki Nacki's Block Keepers. Unthrottled access, no shared public gateways.",
+  description: "Dedicated RPC co-located with our Block Keeper nodes — near-zero latency to the core network. Unthrottled access, no shared public gateways.",
   status: "AVAILABLE",
   href: "/rpc"
 }, {
