@@ -20,11 +20,19 @@ describe("rpcLeadSchema", () => {
     expect(result.success).toBe(true);
   });
 
-  it("requires a name", () => {
-    expect(rpcLeadSchema.safeParse({ ...valid, name: "" }).success).toBe(false);
+  it("accepts a missing name", () => {
+    expect(rpcLeadSchema.safeParse({ email: "a@b.com", message: "hi" }).success).toBe(true);
   });
 
-  it("rejects an invalid email", () => {
+  it("accepts a Telegram-only lead with no email", () => {
+    expect(rpcLeadSchema.safeParse({ telegram: "@ada", message: "hi" }).success).toBe(true);
+  });
+
+  it("requires at least one contact channel", () => {
+    expect(rpcLeadSchema.safeParse({ message: "hi" }).success).toBe(false);
+  });
+
+  it("rejects an invalid email when one is given", () => {
     expect(rpcLeadSchema.safeParse({ ...valid, email: "not-an-email" }).success).toBe(false);
   });
 

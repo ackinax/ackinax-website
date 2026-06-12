@@ -18,8 +18,8 @@ interface Env {
 }
 
 interface RpcLead {
-  name: string;
-  email: string;
+  name?: string;
+  email?: string;
   telegram?: string;
   phone?: string;
   project?: string;
@@ -29,8 +29,8 @@ interface RpcLead {
 }
 
 interface ContactMessage {
-  name: string;
-  email: string;
+  name?: string;
+  email?: string;
   telegram?: string;
   phone?: string;
   message: string;
@@ -77,9 +77,10 @@ function precheck(request: Request, webhook: string | undefined, key: string): R
 }
 
 function buildRpcLeadMessage(lead: RpcLead) {
-  const sender = lead.project?.trim() ? `${lead.name} · ${lead.project.trim()}` : lead.name;
+  const who = lead.name || lead.email || lead.telegram || lead.phone || "New lead";
+  const sender = lead.project ? `${who} · ${lead.project}` : who;
   const facts = [
-    `*Email:* ${lead.email}`,
+    lead.email ? `*Email:* ${lead.email}` : null,
     lead.telegram ? `*Telegram:* ${lead.telegram}` : null,
     lead.phone ? `*Phone:* ${lead.phone}` : null,
     lead.tier ? `*Tier:* ${lead.tier}` : null,
@@ -99,8 +100,9 @@ function buildRpcLeadMessage(lead: RpcLead) {
 }
 
 function buildContactMessage(c: ContactMessage) {
+  const who = c.name || c.email || c.telegram || c.phone || "Someone";
   const channels = [
-    `*Email:* ${c.email}`,
+    c.email ? `*Email:* ${c.email}` : null,
     c.telegram ? `*Telegram:* ${c.telegram}` : null,
     c.phone ? `*Phone:* ${c.phone}` : null,
   ]
@@ -108,11 +110,11 @@ function buildContactMessage(c: ContactMessage) {
     .join("\n");
 
   return {
-    text: `Contact message — ${c.name}`,
+    text: `Contact message — ${who}`,
     blocks: [
       { type: "section", text: { type: "mrkdwn", text: `✉️ *New contact message*\n${c.message}` } },
       { type: "section", text: { type: "mrkdwn", text: channels } },
-      { type: "context", elements: [{ type: "mrkdwn", text: `From: ${c.name}  ·  Source: Contact form (\`/contact\`)` }] },
+      { type: "context", elements: [{ type: "mrkdwn", text: `From: ${who}  ·  Source: Contact form (\`/contact\`)` }] },
     ],
   };
 }
@@ -128,14 +130,16 @@ async function handleRpcLead(request: Request, env: Env): Promise<Response> {
     return json({ error: "Invalid request" }, 400);
   }
 
-  if (!body.name?.trim() || !body.email?.trim() || !body.message?.trim()) {
-    return json({ error: "Name, email and message are required" }, 400);
+  if (!body.message?.trim()) return json({ error: "A message is required" }, 400);
+  const email = body.email?.trim();
+  if (!email && !body.telegram?.trim() && !body.phone?.trim()) {
+    return json({ error: "Provide at least one contact method" }, 400);
   }
-  if (!EMAIL_RE.test(body.email.trim())) return json({ error: "Invalid email" }, 400);
+  if (email && !EMAIL_RE.test(email)) return json({ error: "Invalid email" }, 400);
 
   const lead: RpcLead = {
-    name: body.name.trim().slice(0, 100),
-    email: body.email.trim().slice(0, 255),
+    name: body.name?.trim().slice(0, 100),
+    email: email?.slice(0, 255),
     telegram: body.telegram?.trim().slice(0, 64),
     phone: body.phone?.trim().slice(0, 32),
     project: body.project?.trim().slice(0, 120),
@@ -159,14 +163,16 @@ async function handleContact(request: Request, env: Env): Promise<Response> {
     return json({ error: "Invalid request" }, 400);
   }
 
-  if (!body.name?.trim() || !body.email?.trim() || !body.message?.trim()) {
-    return json({ error: "All fields are required" }, 400);
+  if (!body.message?.trim()) return json({ error: "A message is required" }, 400);
+  const email = body.email?.trim();
+  if (!email && !body.telegram?.trim() && !body.phone?.trim()) {
+    return json({ error: "Provide at least one contact method" }, 400);
   }
-  if (!EMAIL_RE.test(body.email.trim())) return json({ error: "Invalid email" }, 400);
+  if (email && !EMAIL_RE.test(email)) return json({ error: "Invalid email" }, 400);
 
   const contact: ContactMessage = {
-    name: body.name.trim().slice(0, 100),
-    email: body.email.trim().slice(0, 255),
+    name: body.name?.trim().slice(0, 100),
+    email: email?.slice(0, 255),
     telegram: body.telegram?.trim().slice(0, 64),
     phone: body.phone?.trim().slice(0, 32),
     message: body.message.trim().slice(0, 2000),

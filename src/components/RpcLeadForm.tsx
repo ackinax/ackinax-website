@@ -69,7 +69,7 @@ export default function RpcLeadForm({ defaultTier = "", id }: { defaultTier?: st
 
   return (
     <form id={id} onSubmit={handleSubmit} className="card-base space-y-5">
-      <LeadField label="Use case" error={errors.message} required>
+      <LeadField label="Use case" error={errors.message}>
         <Textarea
           value={form.message}
           onChange={(e) => update("message", e.target.value)}
@@ -102,26 +102,27 @@ export default function RpcLeadForm({ defaultTier = "", id }: { defaultTier?: st
       </LeadField>
 
       <div className="space-y-5 pt-5 border-t border-border">
-        <p className="font-mono-brand text-xs uppercase tracking-[0.1em] text-muted-foreground">How can we reach you?</p>
-        <div className="grid sm:grid-cols-2 gap-5">
-          <LeadField label="Name" error={errors.name} required>
-            <Input value={form.name} onChange={(e) => update("name", e.target.value)} placeholder="Your name" maxLength={100} />
-          </LeadField>
-          <LeadField label="Email" error={errors.email} required>
-            <Input type="email" value={form.email} onChange={(e) => update("email", e.target.value)} placeholder="you@example.com" maxLength={255} />
-          </LeadField>
+        <div>
+          <p className="font-mono-brand text-xs uppercase tracking-[0.1em] text-muted-foreground">How can we reach you?</p>
+          <p className="font-body text-xs text-muted-foreground mt-1">Add at least one — email, Telegram or phone.</p>
         </div>
         <div className="grid sm:grid-cols-2 gap-5">
+          <LeadField label="Email" error={errors.email}>
+            <Input type="email" value={form.email} onChange={(e) => update("email", e.target.value)} placeholder="you@example.com" maxLength={255} />
+          </LeadField>
           <LeadField label="Telegram" error={errors.telegram}>
             <Input value={form.telegram} onChange={(e) => update("telegram", e.target.value)} placeholder="@username" maxLength={64} />
           </LeadField>
+        </div>
+        <div className="grid sm:grid-cols-2 gap-5">
           <LeadField label="Phone" error={errors.phone}>
             <Input type="tel" value={form.phone} onChange={(e) => update("phone", e.target.value)} placeholder="+1 555 000 0000" maxLength={32} />
           </LeadField>
+          <LeadField label="Name" error={errors.name}>
+            <Input value={form.name} onChange={(e) => update("name", e.target.value)} placeholder="Your name" maxLength={100} />
+          </LeadField>
         </div>
       </div>
-
-      <p className="font-body text-xs text-muted-foreground"><span className="text-primary">*</span> Required</p>
 
       <button type="submit" disabled={loading} className="btn-primary w-full flex items-center justify-center gap-2">
         {loading && <Loader2 className="h-4 w-4 animate-spin" />}
@@ -131,23 +132,10 @@ export default function RpcLeadForm({ defaultTier = "", id }: { defaultTier?: st
   );
 }
 
-function LeadField({
-  label,
-  error,
-  required,
-  children,
-}: {
-  label: string;
-  error?: string;
-  required?: boolean;
-  children: React.ReactNode;
-}) {
+function LeadField({ label, error, children }: { label: string; error?: string; children: React.ReactNode }) {
   return (
     <div className="space-y-1.5">
-      <Label className="font-body text-sm text-foreground">
-        {label}
-        {required && <span className="text-primary"> *</span>}
-      </Label>
+      <Label className="font-body text-sm text-foreground">{label}</Label>
       {children}
       {error && <p className="text-destructive text-xs font-body">{error}</p>}
     </div>

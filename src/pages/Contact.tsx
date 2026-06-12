@@ -8,13 +8,28 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
 
-const contactSchema = z.object({
-  name: z.string().trim().min(1, "Name is required").max(100, "Name must be under 100 characters"),
-  email: z.string().trim().email("Invalid email address").max(255, "Email must be under 255 characters"),
-  telegram: z.string().trim().max(64, "Keep this under 64 characters").optional(),
-  phone: z.string().trim().max(32, "Keep this under 32 characters").optional(),
-  message: z.string().trim().min(1, "Message is required").max(2000, "Message must be under 2000 characters"),
-});
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+const contactSchema = z
+  .object({
+    name: z.string().trim().max(100, "Name must be under 100 characters").optional(),
+    email: z.string().trim().max(255, "Email must be under 255 characters").optional(),
+    telegram: z.string().trim().max(64, "Keep this under 64 characters").optional(),
+    phone: z.string().trim().max(32, "Keep this under 32 characters").optional(),
+    message: z.string().trim().min(1, "Message is required").max(2000, "Message must be under 2000 characters"),
+  })
+  .superRefine((data, ctx) => {
+    if (data.email && !EMAIL_RE.test(data.email)) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, path: ["email"], message: "Invalid email address" });
+    }
+    if (!data.email && !data.telegram && !data.phone) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["email"],
+        message: "Add at least one way to reach you — email, Telegram or phone",
+      });
+    }
+  });
 
 type ContactForm = z.infer<typeof contactSchema>;
 
@@ -88,7 +103,7 @@ export default function Contact() {
           </p>
 
           <form onSubmit={handleSubmit} className="space-y-5">
-            <Field label="Message" error={errors.message} required>
+            <Field label="Message" error={errors.message}>
               <Textarea
                 value={form.message}
                 onChange={(e) => handleChange("message", e.target.value)}
@@ -99,17 +114,12 @@ export default function Contact() {
             </Field>
 
             <div className="space-y-5 pt-5 border-t border-border">
-              <p className="font-mono-brand text-xs uppercase tracking-[0.1em] text-muted-foreground">How can we reach you?</p>
+              <div>
+                <p className="font-mono-brand text-xs uppercase tracking-[0.1em] text-muted-foreground">How can we reach you?</p>
+                <p className="font-body text-xs text-muted-foreground mt-1">Add at least one — email, Telegram or phone.</p>
+              </div>
               <div className="grid sm:grid-cols-2 gap-5">
-                <Field label="Name" error={errors.name} required>
-                  <Input
-                    value={form.name}
-                    onChange={(e) => handleChange("name", e.target.value)}
-                    placeholder="Your name"
-                    maxLength={100}
-                  />
-                </Field>
-                <Field label="Email" error={errors.email} required>
+                <Field label="Email" error={errors.email}>
                   <Input
                     type="email"
                     value={form.email}
@@ -118,8 +128,6 @@ export default function Contact() {
                     maxLength={255}
                   />
                 </Field>
-              </div>
-              <div className="grid sm:grid-cols-2 gap-5">
                 <Field label="Telegram" error={errors.telegram}>
                   <Input
                     value={form.telegram}
@@ -128,6 +136,8 @@ export default function Contact() {
                     maxLength={64}
                   />
                 </Field>
+              </div>
+              <div className="grid sm:grid-cols-2 gap-5">
                 <Field label="Phone" error={errors.phone}>
                   <Input
                     type="tel"
@@ -137,10 +147,16 @@ export default function Contact() {
                     maxLength={32}
                   />
                 </Field>
+                <Field label="Name" error={errors.name}>
+                  <Input
+                    value={form.name}
+                    onChange={(e) => handleChange("name", e.target.value)}
+                    placeholder="Your name"
+                    maxLength={100}
+                  />
+                </Field>
               </div>
             </div>
-
-            <p className="font-body text-xs text-muted-foreground"><span className="text-primary">*</span> Required</p>
 
             <button type="submit" disabled={loading} className="btn-primary w-full flex items-center justify-center gap-2">
               {loading && <Loader2 className="h-4 w-4 animate-spin" />}
@@ -155,23 +171,10 @@ export default function Contact() {
   );
 }
 
-function Field({
-  label,
-  error,
-  required,
-  children,
-}: {
-  label: string;
-  error?: string;
-  required?: boolean;
-  children: React.ReactNode;
-}) {
+function Field({ label, error, children }: { label: string; error?: string; children: React.ReactNode }) {
   return (
     <div className="space-y-1.5">
-      <Label className="font-body text-sm text-foreground">
-        {label}
-        {required && <span className="text-primary"> *</span>}
-      </Label>
+      <Label className="font-body text-sm text-foreground">{label}</Label>
       {children}
       {error && <p className="text-destructive text-xs font-body">{error}</p>}
     </div>
