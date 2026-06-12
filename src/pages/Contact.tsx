@@ -81,12 +81,12 @@ export default function Contact() {
       <section className="relative pt-32 pb-20 overflow-hidden">
         {/* Grid background */}
         <div className="absolute inset-0 grid-bg pointer-events-none" />
-        {/* Veil that mutes the grid for legibility — strongest at the top, light wash below */}
+        {/* Veil that mutes the grid for legibility — opaque behind the centred form, fading to the sides */}
         <div
           className="absolute inset-0 z-0 pointer-events-none"
           style={{
             background:
-              "linear-gradient(to bottom, hsl(var(--background)) 0%, hsl(var(--background) / 0.92) 6%, hsl(var(--background) / 0.5) 16%, hsl(var(--background) / 0.5) 100%)",
+              "radial-gradient(ellipse 60% 85% at 50% 42%, hsl(var(--background)) 0%, hsl(var(--background) / 0.85) 45%, transparent 82%)",
           }}
         />
         {/* Glow orbs */}
