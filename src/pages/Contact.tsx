@@ -11,7 +11,6 @@ import { Loader2 } from "lucide-react";
 const contactSchema = z.object({
   name: z.string().trim().min(1, "Name is required").max(100, "Name must be under 100 characters"),
   email: z.string().trim().email("Invalid email address").max(255, "Email must be under 255 characters"),
-  subject: z.string().trim().min(1, "Subject is required").max(200, "Subject must be under 200 characters"),
   message: z.string().trim().min(1, "Message is required").max(2000, "Message must be under 2000 characters"),
 });
 
@@ -20,7 +19,7 @@ type ContactForm = z.infer<typeof contactSchema>;
 export default function Contact() {
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
-  const [form, setForm] = useState<ContactForm>({ name: "", email: "", subject: "", message: "" });
+  const [form, setForm] = useState<ContactForm>({ name: "", email: "", message: "" });
   const [errors, setErrors] = useState<Partial<Record<keyof ContactForm, string>>>({});
 
   const handleChange = (field: keyof ContactForm, value: string) => {
@@ -50,7 +49,7 @@ export default function Contact() {
       const data = (await res.json().catch(() => null)) as { success?: boolean } | null;
       if (!res.ok || !data?.success) throw new Error("Request failed");
       toast({ title: "Message sent", description: "Thanks for reaching out — we'll be in touch soon." });
-      setForm({ name: "", email: "", subject: "", message: "" });
+      setForm({ name: "", email: "", message: "" });
     } catch {
       toast({ title: "Something went wrong", description: "Please try again later.", variant: "destructive" });
     } finally {
@@ -94,14 +93,6 @@ export default function Contact() {
                 onChange={(e) => handleChange("email", e.target.value)}
                 placeholder="you@example.com"
                 maxLength={255}
-              />
-            </Field>
-            <Field label="Subject" error={errors.subject}>
-              <Input
-                value={form.subject}
-                onChange={(e) => handleChange("subject", e.target.value)}
-                placeholder="What's this about?"
-                maxLength={200}
               />
             </Field>
             <Field label="Message" error={errors.message}>

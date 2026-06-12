@@ -29,7 +29,6 @@ interface RpcLead {
 interface ContactMessage {
   name: string;
   email: string;
-  subject: string;
   message: string;
 }
 
@@ -97,7 +96,7 @@ function buildContactMessage(c: ContactMessage) {
   return {
     text: `Contact message — ${c.name}`,
     blocks: [
-      { type: "section", text: { type: "mrkdwn", text: `✉️ *${c.subject}*\n${c.message}` } },
+      { type: "section", text: { type: "mrkdwn", text: `✉️ *New contact message*\n${c.message}` } },
       {
         type: "context",
         elements: [{ type: "mrkdwn", text: `From: ${c.name} <${c.email}>  ·  Source: Contact form (\`/contact\`)` }],
@@ -146,7 +145,7 @@ async function handleContact(request: Request, env: Env): Promise<Response> {
     return json({ error: "Invalid request" }, 400);
   }
 
-  if (!body.name?.trim() || !body.email?.trim() || !body.subject?.trim() || !body.message?.trim()) {
+  if (!body.name?.trim() || !body.email?.trim() || !body.message?.trim()) {
     return json({ error: "All fields are required" }, 400);
   }
   if (!EMAIL_RE.test(body.email.trim())) return json({ error: "Invalid email" }, 400);
@@ -154,7 +153,6 @@ async function handleContact(request: Request, env: Env): Promise<Response> {
   const contact: ContactMessage = {
     name: body.name.trim().slice(0, 100),
     email: body.email.trim().slice(0, 255),
-    subject: body.subject.trim().slice(0, 200),
     message: body.message.trim().slice(0, 2000),
   };
 
