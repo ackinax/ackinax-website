@@ -3,7 +3,8 @@ interface ServiceCard {
   icon: string;
   title: string;
   description: string;
-  status: "LIVE" | "ACTIVE" | "COMING SOON";
+  status: "LIVE" | "ACTIVE" | "AVAILABLE" | "COMING SOON";
+  href?: string;
 }
 const cards: ServiceCard[] = [{
   icon: "◎",
@@ -18,8 +19,9 @@ const cards: ServiceCard[] = [{
 }, {
   icon: "⚡",
   title: "RPC Endpoints",
-  description: "Fast, reliable JSON-RPC access to Acki Nacki mainnet and testnet. Low-latency node infrastructure with WebSocket support.",
-  status: "COMING SOON"
+  description: "Dedicated RPC straight from the core network — we run a third of Acki Nacki's Block Keepers. Unthrottled access, no shared public gateways.",
+  status: "AVAILABLE",
+  href: "/rpc"
 }, {
   icon: "{ }",
   title: "GraphQL API",
@@ -27,20 +29,15 @@ const cards: ServiceCard[] = [{
   status: "COMING SOON"
 }];
 function statusColor(status: ServiceCard["status"]) {
-  if (status === "LIVE") return {
-    text: "hsl(160 60% 45%)",
-    bg: "hsl(160 60% 45% / 0.1)",
-    border: "hsl(160 60% 45% / 0.3)"
-  };
-  if (status === "ACTIVE") return {
-    text: "hsl(160 60% 45%)",
-    bg: "hsl(160 60% 45% / 0.1)",
-    border: "hsl(160 60% 45% / 0.3)"
-  };
-  return {
+  if (status === "COMING SOON") return {
     text: "hsl(215 17% 42%)",
     bg: "hsl(215 17% 42% / 0.1)",
     border: "hsl(215 17% 42% / 0.3)"
+  };
+  return {
+    text: "hsl(160 60% 45%)",
+    bg: "hsl(160 60% 45% / 0.1)",
+    border: "hsl(160 60% 45% / 0.3)"
   };
 }
 function Card({
@@ -56,7 +53,7 @@ function Card({
   } = useScrollReveal(0.15);
   const isSoon = card.status === "COMING SOON";
   const colors = statusColor(card.status);
-  const gradientColor = (card.status === "LIVE" || card.status === "ACTIVE") ? "hsl(160 60% 45%)" : "hsl(29 88% 67%)";
+  const gradientColor = card.status === "COMING SOON" ? "hsl(29 88% 67%)" : "hsl(160 60% 45%)";
   return <div ref={ref} className={`card-base relative overflow-hidden transition-all duration-500 ${isVisible ? "animate-fade-slide-up" : "opacity-0"} ${isSoon ? "opacity-50 cursor-default" : "group cursor-pointer"}`} style={{
     animationDelay: `${index * 100}ms`
   }}>
@@ -81,6 +78,7 @@ function Card({
         <h3 className="font-heading text-xl font-semibold text-foreground mb-2">{card.title}</h3>
         <p className="font-body text-sm text-muted-foreground leading-[1.65]">{card.description}</p>
       </div>
+      {card.href && !isSoon && <a href={card.href} aria-label={card.title} className="absolute inset-0 z-20 rounded-xl" />}
     </div>;
 }
 export default function Services() {
