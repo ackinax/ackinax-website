@@ -17,9 +17,9 @@ import {
 
 /* ─── Credibility stats ─── */
 const stats = [
-  { value: "~⅓", label: "of network Block Keepers operated" },
-  { value: "99.9%", label: "uptime SLA" },
+  { value: "59", label: "Block Keeper nodes we run" },
   { value: "0ms", label: "rate limit on indexed data" },
+  { value: "99.9%", label: "uptime SLA" },
   { value: "250", label: "parallel threads supported" },
 ];
 
@@ -27,8 +27,8 @@ const stats = [
 const whyCards = [
   {
     Icon: Network,
-    title: "Straight from the source",
-    desc: "Requests hit the core network directly through infrastructure we operate — no reseller hop, no shared public queue.",
+    title: "Co-located with the Block Keepers",
+    desc: "Our RPC nodes run on the same infrastructure as our Block Keeper nodes — adjacent, not proxied. Requests reach the core network with near-zero added latency.",
   },
   {
     Icon: ShieldCheck,
@@ -178,9 +178,9 @@ export default function Rpc() {
               RPC for Acki Nacki, <span className="gradient-text">straight from the source</span>
             </h1>
             <p className="font-body text-base md:text-lg text-muted-foreground leading-[1.65] max-w-[600px] mb-8">
-              We operate roughly a third of the network's Block Keepers. That means dedicated, unthrottled endpoints with
-              direct access to the core network — no shared public gateways, no Cloudflare throttling, no compute-unit
-              guesswork.
+              Our RPC endpoints run on the same infrastructure as our Block Keeper nodes — co-located, not proxied. You get
+              near-zero latency to the core network on dedicated, unthrottled endpoints — no shared public gateways, no
+              Cloudflare throttling, no compute-unit guesswork.
             </p>
             <div className="flex flex-wrap gap-4">
               <a href="#request" className="btn-primary">Request your endpoint</a>
@@ -214,10 +214,11 @@ export default function Rpc() {
           <div className={`${whyVis ? "animate-fade-slide-up" : "opacity-0"}`}>
             <p className="section-label mb-3 text-center">WHY NATIVE INFRASTRUCTURE</p>
             <h2 className="font-heading text-3xl md:text-4xl font-bold text-foreground tracking-tight mb-3 text-center">
-              The provider that helps run the network
+              We run the infrastructure, not a proxy
             </h2>
             <p className="font-body text-sm text-muted-foreground text-center max-w-[600px] mx-auto mb-12">
-              Multi-chain providers proxy the chain. We help produce it — and that changes what we can offer.
+              Multi-chain providers proxy the chain from the outside. Our RPC nodes sit next to our Block Keeper nodes on
+              the same infrastructure — and that proximity is what you feel in the latency.
             </p>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
