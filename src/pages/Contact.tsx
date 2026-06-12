@@ -6,22 +6,37 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
 import { Loader2 } from "lucide-react";
 
-const contactSchema = z.object({
-  name: z.string().trim().min(1, "Name is required").max(100, "Name must be under 100 characters"),
-  email: z.string().trim().email("Invalid email address").max(255, "Email must be under 255 characters"),
-  subject: z.string().trim().min(1, "Subject is required").max(200, "Subject must be under 200 characters"),
-  message: z.string().trim().min(1, "Message is required").max(2000, "Message must be under 2000 characters"),
-});
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+const contactSchema = z
+  .object({
+    name: z.string().trim().max(100, "Name must be under 100 characters").optional(),
+    email: z.string().trim().max(255, "Email must be under 255 characters").optional(),
+    telegram: z.string().trim().max(64, "Keep this under 64 characters").optional(),
+    phone: z.string().trim().max(32, "Keep this under 32 characters").optional(),
+    message: z.string().trim().min(1, "Message is required").max(2000, "Message must be under 2000 characters"),
+  })
+  .superRefine((data, ctx) => {
+    if (data.email && !EMAIL_RE.test(data.email)) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, path: ["email"], message: "Invalid email address" });
+    }
+    if (!data.email && !data.telegram && !data.phone) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["email"],
+        message: "Add at least one way to reach you — email, Telegram or phone",
+      });
+    }
+  });
 
 type ContactForm = z.infer<typeof contactSchema>;
 
 export default function Contact() {
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
-  const [form, setForm] = useState<ContactForm>({ name: "", email: "", subject: "", message: "" });
+  const [form, setForm] = useState<ContactForm>({ name: "", email: "", telegram: "", phone: "", message: "" });
   const [errors, setErrors] = useState<Partial<Record<keyof ContactForm, string>>>({});
 
   const handleChange = (field: keyof ContactForm, value: string) => {
@@ -43,14 +58,21 @@ export default function Contact() {
     }
     setLoading(true);
     try {
-      const { data, error } = await supabase.functions.invoke("send-contact-email", {
-        body: result.data,
+      const res = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(result.data),
       });
-      if (error) throw error;
+      const data = (await res.json().catch(() => null)) as { success?: boolean } | null;
+      if (!res.ok || !data?.success) throw new Error("Request failed");
       toast({ title: "Message sent", description: "Thanks for reaching out — we'll be in touch soon." });
-      setForm({ name: "", email: "", subject: "", message: "" });
+      setForm({ name: "", email: "", telegram: "", phone: "", message: "" });
     } catch {
-      toast({ title: "Something went wrong", description: "Please try again later.", variant: "destructive" });
+      toast({
+        title: "Couldn't send that",
+        description: "Please email us directly at talk@ackinax.com.",
+        variant: "destructive",
+      });
     } finally {
       setLoading(false);
     }
@@ -63,11 +85,19 @@ export default function Contact() {
       <section className="relative pt-32 pb-20 overflow-hidden">
         {/* Grid background */}
         <div className="absolute inset-0 grid-bg pointer-events-none" />
+        {/* Veil that mutes the grid for legibility — opaque behind the centred form, fading to the sides */}
+        <div
+          className="absolute inset-0 z-0 pointer-events-none"
+          style={{
+            background:
+              "radial-gradient(ellipse 60% 85% at 50% 42%, hsl(var(--background)) 0%, hsl(var(--background) / 0.85) 45%, transparent 82%)",
+          }}
+        />
         {/* Glow orbs */}
         <div className="absolute top-20 left-1/4 w-[300px] h-[300px] rounded-full bg-primary/10 blur-[120px] pointer-events-none" />
         <div className="absolute bottom-10 right-1/4 w-[200px] h-[200px] rounded-full bg-primary/5 blur-[100px] pointer-events-none" />
 
-        <div className="relative max-w-[600px] mx-auto px-6 md:px-10">
+        <div className="relative z-10 max-w-[600px] mx-auto px-6 md:px-10">
           <p className="section-label mb-3">Get in touch</p>
           <h1 className="font-heading text-3xl md:text-4xl font-bold mb-3">
             <span className="gradient-text">Contact Us</span>
@@ -77,31 +107,6 @@ export default function Contact() {
           </p>
 
           <form onSubmit={handleSubmit} className="space-y-5">
-            <Field label="Name" error={errors.name}>
-              <Input
-                value={form.name}
-                onChange={(e) => handleChange("name", e.target.value)}
-                placeholder="Your name"
-                maxLength={100}
-              />
-            </Field>
-            <Field label="Email" error={errors.email}>
-              <Input
-                type="email"
-                value={form.email}
-                onChange={(e) => handleChange("email", e.target.value)}
-                placeholder="you@example.com"
-                maxLength={255}
-              />
-            </Field>
-            <Field label="Subject" error={errors.subject}>
-              <Input
-                value={form.subject}
-                onChange={(e) => handleChange("subject", e.target.value)}
-                placeholder="What's this about?"
-                maxLength={200}
-              />
-            </Field>
             <Field label="Message" error={errors.message}>
               <Textarea
                 value={form.message}
@@ -111,6 +116,51 @@ export default function Contact() {
                 maxLength={2000}
               />
             </Field>
+
+            <div className="space-y-5 pt-5 border-t border-border">
+              <div>
+                <p className="font-mono-brand text-xs uppercase tracking-[0.1em] text-muted-foreground">How can we reach you?</p>
+                <p className="font-body text-xs text-muted-foreground mt-1">Add at least one — email, Telegram or phone.</p>
+              </div>
+              <div className="grid sm:grid-cols-2 gap-5">
+                <Field label="Email" error={errors.email}>
+                  <Input
+                    type="email"
+                    value={form.email}
+                    onChange={(e) => handleChange("email", e.target.value)}
+                    placeholder="you@example.com"
+                    maxLength={255}
+                  />
+                </Field>
+                <Field label="Telegram" error={errors.telegram}>
+                  <Input
+                    value={form.telegram}
+                    onChange={(e) => handleChange("telegram", e.target.value)}
+                    placeholder="@username"
+                    maxLength={64}
+                  />
+                </Field>
+              </div>
+              <div className="grid sm:grid-cols-2 gap-5">
+                <Field label="Phone" error={errors.phone}>
+                  <Input
+                    type="tel"
+                    value={form.phone}
+                    onChange={(e) => handleChange("phone", e.target.value)}
+                    placeholder="+1 555 000 0000"
+                    maxLength={32}
+                  />
+                </Field>
+                <Field label="Name" error={errors.name}>
+                  <Input
+                    value={form.name}
+                    onChange={(e) => handleChange("name", e.target.value)}
+                    placeholder="Your name"
+                    maxLength={100}
+                  />
+                </Field>
+              </div>
+            </div>
 
             <button type="submit" disabled={loading} className="btn-primary w-full flex items-center justify-center gap-2">
               {loading && <Loader2 className="h-4 w-4 animate-spin" />}
