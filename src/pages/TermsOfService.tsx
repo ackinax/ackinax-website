@@ -20,7 +20,7 @@ export default function TermsOfService() {
 
           <section>
             <h2 className="font-mono-brand text-lg text-foreground mb-3">2. ACCEPTANCE OF TERMS</h2>
-            <p>By accessing, browsing or using any part of the Platform—or by clicking any button or checkbox marked "I agree", "Accept" or similar—you:</p>
+            <p>By accessing, browsing or using any part of the Platform, or by clicking any button or checkbox marked "I agree", "Accept" or similar, you:</p>
             <ul className="list-disc pl-6 mt-2 space-y-1">
               <li>represent that you have read, understood and agree to be bound by these Terms and our Privacy Notice; and</li>
               <li>warrant that you have the legal capacity and authority required to do so on your own behalf or on behalf of the entity you represent.</li>
@@ -54,7 +54,7 @@ export default function TermsOfService() {
             <h3 className="font-mono-brand text-base text-foreground mb-2">4.1 The Platform</h3>
             <p>AckiNax is a specialised infrastructure service that enables Users who already own or control one or more Nodes to outsource the technical maintenance, monitoring and operation of those Nodes to the Company. The Platform provides a streamlined interface for (i) onboarding Nodes, (ii) entering into a Delegation Agreement, (iii) tracking performance metrics and (iv) managing fee payments.</p>
             <h3 className="font-mono-brand text-base text-foreground mb-2 mt-4">4.2 The Services</h3>
-            <p>Through the Platform, Users may enter into a Delegation of Node Maintenance and Operation service (Node-as-a-Service or NaaS). Under the NaaS model, SYKS—either directly or through vetted third-party providers—performs all tasks required to keep the User's Node(s) online, updated, secure and compliant with the rules of the underlying blockchain network.</p>
+            <p>Through the Platform, Users may enter into a Delegation of Node Maintenance and Operation service (Node-as-a-Service or NaaS). Under the NaaS model, SYKS, either directly or through vetted third-party providers, performs all tasks required to keep the User's Node(s) online, updated, secure and compliant with the rules of the underlying blockchain network.</p>
           </section>
 
           <section>
@@ -105,7 +105,7 @@ export default function TermsOfService() {
             </ol>
             <p className="mt-3">Violation may result in immediate suspension or termination of your Account and, where appropriate, legal action.</p>
             <h3 className="font-mono-brand text-base text-foreground mb-2 mt-4">7.3 Prohibition of Web Scraping and Automated Data Collection</h3>
-            <p>Automated extraction of data from the Platform—including training AI models—is strictly prohibited without SYKS's prior written consent.</p>
+            <p>Automated extraction of data from the Platform, including training AI models, is strictly prohibited without SYKS's prior written consent.</p>
           </section>
 
           <section>

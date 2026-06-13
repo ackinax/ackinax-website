@@ -25,7 +25,7 @@ export default function PredictionMarkets() {
               Ackinax oracle feeds power decentralized prediction markets on DoDex. We deliver verified event outcomes on-chain so anyone can create markets, set terms, and let smart contracts handle settlement.
             </p>
             <p className="font-body text-sm text-muted-foreground leading-[1.65]">
-              From price movements to real-world events — define your market, publish it on-chain, and our oracle infrastructure ensures trustworthy resolution.
+              From price movements to real-world events: define your market, publish it on-chain, and our oracle infrastructure ensures trustworthy resolution.
             </p>
           </div>
         </div>

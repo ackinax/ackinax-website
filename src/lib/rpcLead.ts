@@ -4,9 +4,9 @@ import { z } from "zod";
 export const FALLBACK_EMAIL = "talk@ackinax.com";
 
 export const TIER_OPTIONS = [
-  "Starter — shared endpoint",
-  "Commercial — dedicated endpoint",
-  "Dedicated / Managed — fully managed",
+  "Starter · shared endpoint",
+  "Commercial · dedicated endpoint",
+  "Dedicated / Managed · fully managed",
   "Managed Block Manager hosting",
   "Not sure yet",
 ] as const;
@@ -32,7 +32,7 @@ export const rpcLeadSchema = z
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         path: ["email"],
-        message: "Add at least one way to reach you — email, Telegram or phone",
+        message: "Add at least one way to reach you: email, Telegram or phone",
       });
     }
   });

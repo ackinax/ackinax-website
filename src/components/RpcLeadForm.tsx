@@ -58,7 +58,7 @@ export default function RpcLeadForm({ defaultTier = "", id }: { defaultTier?: st
   if (sent) {
     return (
       <div id={id} className="card-base text-center">
-        <h3 className="font-heading text-xl font-semibold text-foreground mb-2">Thanks — request received</h3>
+        <h3 className="font-heading text-xl font-semibold text-foreground mb-2">Thanks, request received</h3>
         <p className="font-body text-sm text-muted-foreground">
           We'll reach out shortly to get you live. Feel free to reach out by email{" "}
           <a href={`mailto:${FALLBACK_EMAIL}`} className="text-primary hover:underline">{FALLBACK_EMAIL}</a>.
@@ -104,7 +104,7 @@ export default function RpcLeadForm({ defaultTier = "", id }: { defaultTier?: st
       <div className="space-y-5 pt-5 border-t border-border">
         <div>
           <p className="font-mono-brand text-xs uppercase tracking-[0.1em] text-muted-foreground">How can we reach you?</p>
-          <p className="font-body text-xs text-muted-foreground mt-1">Add at least one — email, Telegram or phone.</p>
+          <p className="font-body text-xs text-muted-foreground mt-1">Add at least one: email, Telegram or phone.</p>
         </div>
         <div className="grid sm:grid-cols-2 gap-5">
           <LeadField label="Email" error={errors.email}>

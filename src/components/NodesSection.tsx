@@ -18,7 +18,7 @@ export default function NodesSection() {
             Block Keeper nodes, fully managed
           </h2>
           <p className="font-body text-sm text-muted-foreground leading-[1.65] max-w-[600px] mb-8">
-            Run validator infrastructure on Acki Nacki without the operational overhead. Our Block Keeper nodes provide enterprise-grade uptime, monitoring, and maintenance — so you can focus on building.
+            Run validator infrastructure on Acki Nacki without the operational overhead. Our Block Keeper nodes provide enterprise-grade uptime, monitoring, and maintenance, so you can focus on building.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 sm:gap-8 mb-10">

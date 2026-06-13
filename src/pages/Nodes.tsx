@@ -116,7 +116,7 @@ export default function Nodes() {
               </a>
             </div>
 
-            {/* Right — decorative server visual */}
+            {/* Right: decorative server visual */}
             <div className="flex justify-center">
               <div className="relative w-[280px] h-[280px] rounded-3xl border border-border bg-card flex items-center justify-center gap-6">
                 <div className="absolute inset-0 rounded-3xl opacity-20" style={{

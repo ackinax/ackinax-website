@@ -18,7 +18,7 @@ import {
 /* ─── Credibility stats ─── */
 const stats: { value: string; label: string; sub?: string }[] = [
   { value: "55+", label: "BK nodes", sub: "a significant part of the network" },
-  { value: "0ms", label: "rate limit on indexed data" },
+  { value: "Unlimited", label: "requests on indexed data" },
   { value: "99.9%", label: "uptime SLA" },
   { value: "250", label: "parallel threads supported" },
 ];
@@ -28,7 +28,7 @@ const whyCards = [
   {
     Icon: Network,
     title: "Co-located with the Block Keepers",
-    desc: "Our RPC nodes run on the same infrastructure as our Block Keeper nodes — adjacent, not proxied. Requests reach the core network with near-zero added latency.",
+    desc: "Our RPC nodes run on the same infrastructure as our Block Keeper nodes, adjacent, not proxied. Requests reach the core network with near-zero added latency.",
   },
   {
     Icon: ShieldCheck,
@@ -38,17 +38,17 @@ const whyCards = [
   {
     Icon: Zap,
     title: "Built for trading & AI agents",
-    desc: "Unthrottled, real-time indexed on-chain data — purpose-built for market makers and autonomous agents trading on the DEX.",
+    desc: "Unthrottled, real-time indexed on-chain data, purpose-built for market makers and autonomous agents trading on the DEX.",
   },
   {
     Icon: Database,
-    title: "Full archive from genesis",
-    desc: "We've run nodes since the first block. Complete history with no gaps in coverage.",
+    title: "Network participant from genesis",
+    desc: "We've run nodes since the first block, through every protocol upgrade and consensus change. Battle-tested ops, not a learning curve on your traffic.",
   },
   {
     Icon: Target,
     title: "One chain, done properly",
-    desc: "We run Acki Nacki — not 84 chains. Every rack and on-call rotation is dedicated to a single network's performance.",
+    desc: "We run Acki Nacki, not 84 chains. Every rack and on-call rotation is dedicated to a single network's performance.",
   },
   {
     Icon: Receipt,
@@ -83,7 +83,7 @@ const tiers = [
     blurb: "Production apps, market makers and commercial operators that need isolated throughput.",
     features: [
       "Direct Block-Keeper routing · no WAF · native indexed data",
-      "Dedicated endpoint — isolated throughput",
+      "Dedicated endpoint: isolated throughput",
       "200+ RPS sustained, bursting higher",
       "5–10 TB egress / month",
       "99.9% uptime SLA",
@@ -112,17 +112,17 @@ const tiers = [
 /* ─── Comparison table ─── */
 const comparison = [
   { feature: "Core-network access", ackinax: "Direct Block Keeper", generic: "Proxied / shared" },
-  { feature: "Cloudflare WAF throttling", ackinax: "None — whitelisted", generic: "Common on public tiers" },
+  { feature: "Cloudflare WAF throttling", ackinax: "None, whitelisted", generic: "Common on public tiers" },
   { feature: "Pricing model", ackinax: "Bundled requests", generic: "Compute units (×26 methods)" },
-  { feature: "Indexed-data rate limit", ackinax: "0ms — unthrottled", generic: "Tiered limits" },
-  { feature: "Archive coverage", ackinax: "From genesis", generic: "Often partial" },
+  { feature: "Indexed-data rate limit", ackinax: "None, unthrottled", generic: "Tiered limits" },
+  { feature: "Operational history", ackinax: "Since genesis", generic: "New / variable" },
   { feature: "Chain focus", ackinax: "Acki Nacki only", generic: "80+ chains, none deeply" },
 ];
 
 /* ─── Quickstart ─── */
 const steps = [
   { n: "1", title: "Request access", desc: "Tell us your use case and volume. We whitelist your IPs and domains." },
-  { n: "2", title: "Point your client", desc: "Swap in your dedicated endpoint URL — no code changes beyond the host." },
+  { n: "2", title: "Point your client", desc: "Swap in your dedicated endpoint URL, no code changes beyond the host." },
   { n: "3", title: "Ship", desc: "Direct, unthrottled access. No rate-limit surprises in production." },
 ];
 
@@ -140,7 +140,7 @@ export default function Rpc() {
       {/* Grid background */}
       <div className="fixed inset-0 grid-bg pointer-events-none" />
 
-      {/* Veil that mutes the grid for legibility — strongest at the top, light wash below. One layer, so no per-section seams. */}
+      {/* Veil that mutes the grid for legibility: strongest at the top, light wash below. One layer, so no per-section seams. */}
       <div
         className="absolute inset-0 z-0 pointer-events-none"
         style={{
@@ -171,15 +171,15 @@ export default function Rpc() {
             >
               <span className="w-1.5 h-1.5 rounded-full bg-success animate-pulse-dot" />
               <span className="font-mono-brand text-xs font-medium tracking-[0.04em]" style={{ color: "#f7b787" }}>
-                ACKI NACKI — NATIVE RPC
+                ACKI NACKI · NATIVE RPC
               </span>
             </div>
             <h1 className="font-heading text-4xl md:text-5xl lg:text-6xl font-bold text-foreground tracking-[-0.03em] leading-[1.08] mb-6">
               RPC for Acki Nacki, <span className="gradient-text">straight from the source</span>
             </h1>
             <p className="font-body text-base md:text-lg text-muted-foreground leading-[1.65] max-w-[600px] mb-8">
-              Our RPC endpoints run on the same infrastructure as our Block Keeper nodes — co-located, not proxied. You get
-              near-zero latency to the core network on dedicated, unthrottled endpoints — no shared public gateways, no
+              Our RPC endpoints run on the same infrastructure as our Block Keeper nodes, co-located, not proxied. You get
+              near-zero latency to the core network on dedicated, unthrottled endpoints, no shared public gateways, no
               Cloudflare throttling, no compute-unit guesswork.
             </p>
             <div className="flex flex-wrap gap-4">
@@ -219,7 +219,7 @@ export default function Rpc() {
             </h2>
             <p className="font-body text-sm text-muted-foreground text-center max-w-[600px] mx-auto mb-12">
               Multi-chain providers proxy the chain from the outside. Our RPC nodes sit next to our Block Keeper nodes on
-              the same infrastructure — and that proximity is what you feel in the latency.
+              the same infrastructure, and that proximity is what you feel in the latency.
             </p>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -250,7 +250,7 @@ export default function Rpc() {
               From first call to full scale
             </h2>
             <p className="font-body text-sm text-muted-foreground text-center max-w-[620px] mx-auto mb-12">
-              Start on a shared endpoint and move to dedicated infrastructure as you grow — whether you're a mini-app, a
+              Start on a shared endpoint and move to dedicated infrastructure as you grow, whether you're a mini-app, a
               market maker, an AI-agent platform on the DEX, or a commercial operator. Bundled per-request pricing: you pay
               for throughput, not per-method multipliers.
             </p>
@@ -298,7 +298,7 @@ export default function Rpc() {
               ))}
             </div>
             <p className="font-body text-xs text-muted-foreground text-center mt-6">
-              Egress beyond the included allowance billed per TB. Prices indicative — exact quote on request.
+              Egress beyond the included allowance billed per TB. Prices indicative, exact quote on request.
             </p>
           </div>
         </div>
@@ -376,7 +376,7 @@ export default function Rpc() {
                 </code>
               </div>
               <p className="font-body text-xs text-muted-foreground mt-2 text-center">
-                Access is allowlisted at the network layer — your IPs and domains, enforced at our firewall. Nothing
+                Access is allowlisted at the network layer, your IPs and domains, enforced at our firewall. Nothing
                 shared, no key to leak, no public rate-limit pool.
               </p>
             </div>
@@ -397,7 +397,7 @@ export default function Rpc() {
               </h2>
               <p className="font-body text-sm text-muted-foreground leading-[1.65] max-w-[560px] mx-auto mb-8">
                 Skip the hardware. We'll run your Block Manager on dedicated, monitored infrastructure as part of the
-                network — you keep the license, we keep it online and performing.
+                network, you keep the license, we keep it online and performing.
               </p>
               <a href="#request" className="btn-ghost">Talk to us about managed hosting</a>
             </div>

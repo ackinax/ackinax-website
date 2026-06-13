@@ -25,7 +25,7 @@ export default function Hero() {
           <span className="font-mono-brand text-xs font-medium tracking-[0.04em]" style={{
           color: "#f7b787"
         }}>
-            ACKI NACKI MAINNET — LIVE
+            ACKI NACKI MAINNET · LIVE
           </span>
         </div>
 

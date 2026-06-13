@@ -19,7 +19,7 @@ const cards: ServiceCard[] = [{
 }, {
   icon: "⚡",
   title: "RPC Endpoints",
-  description: "Dedicated RPC co-located with our Block Keeper nodes — near-zero latency to the core network. Unthrottled access, no shared public gateways.",
+  description: "Dedicated RPC co-located with our Block Keeper nodes, near-zero latency to the core network. Unthrottled access, no shared public gateways.",
   status: "AVAILABLE",
   href: "/rpc"
 }, {
@@ -98,7 +98,7 @@ export default function Services() {
         <div className="flex items-center gap-3 mb-6">
           <span className="inline-block w-2 h-2 rounded-full bg-[hsl(160_60%_45%)] animate-[pulse_2s_cubic-bezier(0.4,0,0.6,1)_infinite]" />
           <span className="font-mono-brand text-xs tracking-[0.2em] text-muted-foreground">
-            ACKI NACKI MAINNET — <span className="text-[hsl(160_60%_45%)]">LIVE</span>
+            ACKI NACKI MAINNET · <span className="text-[hsl(160_60%_45%)]">LIVE</span>
           </span>
         </div>
 

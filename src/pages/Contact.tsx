@@ -26,7 +26,7 @@ const contactSchema = z
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         path: ["email"],
-        message: "Add at least one way to reach you — email, Telegram or phone",
+        message: "Add at least one way to reach you: email, Telegram or phone",
       });
     }
   });
@@ -65,7 +65,7 @@ export default function Contact() {
       });
       const data = (await res.json().catch(() => null)) as { success?: boolean } | null;
       if (!res.ok || !data?.success) throw new Error("Request failed");
-      toast({ title: "Message sent", description: "Thanks for reaching out — we'll be in touch soon." });
+      toast({ title: "Message sent", description: "Thanks for reaching out, we'll be in touch soon." });
       setForm({ name: "", email: "", telegram: "", phone: "", message: "" });
     } catch {
       toast({
@@ -85,7 +85,7 @@ export default function Contact() {
       <section className="relative pt-32 pb-20 overflow-hidden">
         {/* Grid background */}
         <div className="absolute inset-0 grid-bg pointer-events-none" />
-        {/* Veil that mutes the grid for legibility — opaque behind the centred form, fading to the sides */}
+        {/* Veil that mutes the grid for legibility: opaque behind the centred form, fading to the sides */}
         <div
           className="absolute inset-0 z-0 pointer-events-none"
           style={{
@@ -120,7 +120,7 @@ export default function Contact() {
             <div className="space-y-5 pt-5 border-t border-border">
               <div>
                 <p className="font-mono-brand text-xs uppercase tracking-[0.1em] text-muted-foreground">How can we reach you?</p>
-                <p className="font-body text-xs text-muted-foreground mt-1">Add at least one — email, Telegram or phone.</p>
+                <p className="font-body text-xs text-muted-foreground mt-1">Add at least one: email, Telegram or phone.</p>
               </div>
               <div className="grid sm:grid-cols-2 gap-5">
                 <Field label="Email" error={errors.email}>
