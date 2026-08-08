@@ -165,7 +165,7 @@ export default function Nodes() {
               <p className="font-body text-sm text-muted-foreground mb-6">For Acki Nacki validators</p>
 
               <div className="mb-8">
-                <span className="font-heading text-5xl font-bold text-foreground">€20</span>
+                <span className="font-heading text-5xl font-bold text-foreground">€22</span>
                 <span className="font-body text-muted-foreground ml-1">/month</span>
               </div>
 
@@ -177,7 +177,7 @@ export default function Nodes() {
               </ul>
 
               <div className="mb-6">
-                <a href="https://buy.stripe.com/00w3cv7yde0Z0ku92S0ZW04" target="_blank" rel="noopener noreferrer" className="btn-primary w-full block text-center">
+                <a href="https://buy.stripe.com/dRmbJ13hX7CBffo7YO0ZW05" target="_blank" rel="noopener noreferrer" className="btn-primary w-full block text-center">
                   Subscribe Now
                 </a>
               </div>
