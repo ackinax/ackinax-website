@@ -7,8 +7,8 @@
  * would delete phones a prior submission recorded.
  */
 
-import type { AttioClient, AttioFailure } from "./client";
-import type { MatchKeyKind, NormalizedIdentity } from "../identity";
+import { describeFailure, retryOnce, type AttioClient } from "./client";
+import { MATCH_KEY_KINDS, type MatchKeyKind, type NormalizedIdentity } from "../identity";
 
 interface AttioPersonRecord {
   id: { record_id: string };
@@ -41,12 +41,6 @@ export interface PersonOutcome {
 
 export type PersonResult = { ok: true; person: PersonOutcome } | { ok: false; error: string };
 
-const IDENTIFIER_KINDS: readonly MatchKeyKind[] = ["email", "telegram", "phone"];
-
-function describeFailure(result: AttioFailure): string {
-  return result.message ?? `Attio request failed with status ${result.status}`;
-}
-
 function buildOrFilter(identity: NormalizedIdentity): Record<string, unknown> {
   const branches: unknown[] = [];
   if (identity.email) branches.push({ email_addresses: { email_address: { $eq: identity.email } } });
@@ -60,13 +54,6 @@ async function queryPeopleOnce(client: AttioClient, identity: NormalizedIdentity
     filter: buildOrFilter(identity),
     limit: 10,
   });
-}
-
-/** KTD4: reads may retry once on failure; writes never do. */
-async function queryPeopleWithRetry(client: AttioClient, identity: NormalizedIdentity) {
-  const first = await queryPeopleOnce(client, identity);
-  if (first.ok) return first;
-  return queryPeopleOnce(client, identity);
 }
 
 /** Which of the submission's identifiers this record's stored values already carry. */
@@ -85,11 +72,10 @@ function matchedIdentifiers(record: AttioPersonRecord, identity: NormalizedIdent
   return matched;
 }
 
-/** KTD2: email outranks Telegram outranks phone. */
+/** KTD2, via MATCH_KEY_KINDS: email outranks Telegram outranks phone. */
 function precedenceRank(matched: Set<MatchKeyKind>): number {
-  if (matched.has("email")) return 0;
-  if (matched.has("telegram")) return 1;
-  return 2;
+  const index = MATCH_KEY_KINDS.findIndex((kind) => matched.has(kind));
+  return index === -1 ? MATCH_KEY_KINDS.length : index;
 }
 
 function buildValues(name: string | undefined, identity: NormalizedIdentity, restrictTo?: Set<MatchKeyKind>) {
@@ -130,7 +116,7 @@ async function patchPerson(
   });
   if (!result.ok) return { ok: false, error: describeFailure(result) };
 
-  const written = IDENTIFIER_KINDS.filter(
+  const written = MATCH_KEY_KINDS.filter(
     (kind) => input.identity[kind] !== undefined && (!restrictTo || restrictTo.has(kind)),
   );
   const newlyAddedIdentifiers = written.filter((kind) => !alreadyMatched.has(kind));
@@ -139,7 +125,7 @@ async function patchPerson(
 }
 
 export async function resolvePerson(client: AttioClient, input: PersonInput): Promise<PersonResult> {
-  const queryResult = await queryPeopleWithRetry(client, input.identity);
+  const queryResult = await retryOnce(() => queryPeopleOnce(client, input.identity));
   if (!queryResult.ok) return { ok: false, error: describeFailure(queryResult) };
 
   const records = queryResult.data;
@@ -178,7 +164,7 @@ export async function resolvePerson(client: AttioClient, input: PersonInput): Pr
   }
 
   const restrictTo = new Set<MatchKeyKind>(
-    IDENTIFIER_KINDS.filter((kind) => input.identity[kind] !== undefined && !claimedByOthers.has(kind)),
+    MATCH_KEY_KINDS.filter((kind) => input.identity[kind] !== undefined && !claimedByOthers.has(kind)),
   );
 
   return patchPerson(client, selected.record.id.record_id, input, restrictTo, selected.matched, true);

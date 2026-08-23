@@ -41,8 +41,20 @@ function truncate(text: string, max: number): string {
   return text.length > max ? `${text.slice(0, max)}…` : text;
 }
 
-function describeError(err: unknown): string {
+export function describeError(err: unknown): string {
   return err instanceof Error ? err.message : String(err);
+}
+
+/** A human-readable message for a failed AttioResult, for a Slack notice or log line. */
+export function describeFailure(result: AttioFailure): string {
+  return result.message ?? `Attio request failed with status ${result.status}`;
+}
+
+/** KTD4: reads may retry once on failure; writes never do (never wrap a write call in this). */
+export async function retryOnce<T>(attempt: () => Promise<AttioResult<T>>): Promise<AttioResult<T>> {
+  const first = await attempt();
+  if (first.ok) return first;
+  return attempt();
 }
 
 export function createAttioClient(config: AttioClientConfig): AttioClient {

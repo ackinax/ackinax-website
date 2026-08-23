@@ -133,11 +133,16 @@ const DEFAULT_TO_LADDER: Record<string, Stage> = {
 
 async function reportCurrentSchema(): Promise<void> {
   console.log("Current schema:");
-  for (const object of ["people", "deals"] as const) {
-    const res = await attio(`/v2/objects/${object}/attributes`);
+  const objects = ["people", "deals"] as const;
+  // Independent reads - fetch concurrently, but log in a fixed order so
+  // output stays deterministic regardless of which resolves first.
+  const results = await Promise.all(objects.map((object) => attio(`/v2/objects/${object}/attributes`)));
+
+  objects.forEach((object, i) => {
+    const res = results[i];
     if (!res.ok) {
       console.log(`  could not read ${object} attributes: ${res.status} ${JSON.stringify(res.body)}`);
-      continue;
+      return;
     }
     const attributes = ((res.body as { data?: Array<Record<string, unknown>> } | null)?.data ?? []) as Array<
       Record<string, unknown>
@@ -146,7 +151,7 @@ async function reportCurrentSchema(): Promise<void> {
       .map((a) => `${a.api_slug} (${a.type}${a.is_unique ? ", unique" : ""})`)
       .join(", ");
     console.log(`  ${object}: ${summary || "(no attributes returned)"}`);
-  }
+  });
 }
 
 /**
@@ -156,12 +161,12 @@ async function reportCurrentSchema(): Promise<void> {
  * still exists (archived), so a conflict also counts as "yes, supported".
  */
 async function probeUniqueAttributeSupport(object: "people" | "deals"): Promise<boolean> {
-  const probeSlug = "_probe_unique_ce_work";
+  const probeSlug = "_probe_unique_attio_setup";
   const res = await attio(`/v2/objects/${object}/attributes`, {
     method: "POST",
     body: JSON.stringify({
       data: {
-        title: "CE Work Probe (safe to archive/ignore)",
+        title: "Attio Setup Probe (safe to archive/ignore)",
         api_slug: probeSlug,
         type: "text",
         is_unique: true,

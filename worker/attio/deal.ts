@@ -6,9 +6,9 @@
  * (KTD4).
  */
 
-import type { AttioClient, AttioFailure } from "./client";
+import { describeFailure, retryOnce, type AttioClient } from "./client";
 import { FIRST_STAGE, isOpenStage, subTypeForTier, DEAL_OWNER_EMAIL, type LeadSource } from "./schema";
-import type { NormalizedIdentity } from "../identity";
+import { MATCH_KEY_KINDS, type NormalizedIdentity } from "../identity";
 
 interface AttioDealRecord {
   id: { record_id: string };
@@ -38,10 +38,6 @@ export interface DealOutcome {
 
 export type DealResult = { ok: true; deal: DealOutcome } | { ok: false; error: string };
 
-function describeFailure(result: AttioFailure): string {
-  return result.message ?? `Attio request failed with status ${result.status}`;
-}
-
 function extractStageTitle(record: AttioDealRecord): string | undefined {
   const raw = record.values.stage?.[0]?.status;
   if (!raw) return undefined;
@@ -58,13 +54,6 @@ async function queryDealsForPersonOnce(client: AttioClient, personRecordId: stri
     filter: { associated_people: { target_object: "people", target_record_id: personRecordId } },
     limit: 25,
   });
-}
-
-/** KTD4: reads may retry once on failure; writes never do. */
-async function queryDealsForPerson(client: AttioClient, personRecordId: string) {
-  const first = await queryDealsForPersonOnce(client, personRecordId);
-  if (first.ok) return first;
-  return queryDealsForPersonOnce(client, personRecordId);
 }
 
 function findOpenDeal(records: AttioDealRecord[]): AttioDealRecord | undefined {
@@ -96,14 +85,8 @@ async function createDeal(client: AttioClient, input: DealInput): Promise<DealRe
   return { ok: true, deal: { dealRecordId: result.data.id.record_id, action: "created" } };
 }
 
-const IDENTIFIER_LABELS: Array<[keyof NormalizedIdentity, string]> = [
-  ["email", "email"],
-  ["telegram", "telegram"],
-  ["phone", "phone"],
-];
-
 function buildNoteContent(input: DealInput): string {
-  const channels = IDENTIFIER_LABELS.filter(([key]) => input.identity[key]).map(([, label]) => label);
+  const channels = MATCH_KEY_KINDS.filter((kind) => input.identity[kind]);
 
   const lines: Array<string | undefined> = [
     input.message,
@@ -138,7 +121,7 @@ async function attachNote(client: AttioClient, dealRecordId: string, input: Deal
 }
 
 export async function resolveDealAndAttachNote(client: AttioClient, input: DealInput): Promise<DealResult> {
-  const queryResult = await queryDealsForPerson(client, input.personRecordId);
+  const queryResult = await retryOnce(() => queryDealsForPersonOnce(client, input.personRecordId));
   if (!queryResult.ok) return { ok: false, error: describeFailure(queryResult) };
 
   const openDeal = findOpenDeal(queryResult.data);

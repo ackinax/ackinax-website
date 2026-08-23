@@ -4,10 +4,11 @@
  */
 
 import { normalizeIdentity, chooseMatchKey, type NormalizedIdentity } from "../identity";
-import { createAttioClient } from "./client";
+import { createAttioClient, describeError } from "./client";
 import { resolvePerson, type PersonOutcome } from "./person";
 import { resolveDealAndAttachNote, type DealInput } from "./deal";
 import type { LeadSource } from "./schema";
+import { RATE_WINDOW_MS } from "../constants";
 
 export interface RawLeadFields {
   name?: string;
@@ -60,11 +61,10 @@ export interface RunSyncOptions {
   source: LeadSource;
 }
 
-// Failure-notice detail throttle: per-isolate, best-effort, mirroring
-// RATE_WINDOW_MS in worker/index.ts. Every failure still posts an
+// Failure-notice detail throttle: per-isolate, best-effort, sharing the
+// window worker/index.ts's rate limiter uses. Every failure still posts an
 // identifying line - only the diagnostic detail is throttled, so manual
 // re-entry from Slack stays possible for every failed lead.
-const FAILURE_DETAIL_WINDOW_MS = 60_000;
 let lastDetailedFailureAt = 0;
 
 /** Test-only escape hatch for the module-level throttle state. */
@@ -80,7 +80,7 @@ async function notifyFailure(options: RunSyncOptions, step: string, error: strin
   if (options.suppressFailureNotice) return;
 
   const now = Date.now();
-  const includeDetail = now - lastDetailedFailureAt >= FAILURE_DETAIL_WINDOW_MS;
+  const includeDetail = now - lastDetailedFailureAt >= RATE_WINDOW_MS;
   if (includeDetail) lastDetailedFailureAt = now;
 
   const identifier = identifyLead(options.lead, options.identity);
@@ -144,6 +144,6 @@ export async function runSync(options: RunSyncOptions): Promise<void> {
 
     await notifySuccessIfNoteworthy(options, personResult.person);
   } catch (err) {
-    await notifyFailure(options, "unexpected", err instanceof Error ? err.message : String(err));
+    await notifyFailure(options, "unexpected", describeError(err));
   }
 }

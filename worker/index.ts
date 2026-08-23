@@ -13,8 +13,9 @@
  */
 
 import { parseRpcLead, parseContactChannels, isValidationError, type RpcLead, type ContactMessage } from "./lead";
-import { evaluateSyncGate, runSync } from "./attio/sync";
-import { DEAL_OWNER_EMAIL } from "./attio/schema";
+import { evaluateSyncGate, runSync, type RawLeadFields, type SyncGateResult } from "./attio/sync";
+import { DEAL_OWNER_EMAIL, type LeadSource } from "./attio/schema";
+import { RATE_WINDOW_MS } from "./constants";
 
 interface Env {
   ASSETS: { fetch(request: Request): Promise<Response> };
@@ -24,7 +25,6 @@ interface Env {
 
 // Best-effort, per-isolate rate limit — a soft guard against casual abuse.
 const RATE_LIMIT = 6;
-const RATE_WINDOW_MS = 60_000;
 const hits = new Map<string, number[]>();
 
 function rateLimited(key: string): boolean {
@@ -111,6 +111,29 @@ function buildContactMessage(c: ContactMessage, crmStatusMarker?: string) {
   };
 }
 
+/** Shared by both handlers: gate already evaluated, schedule the background sync if it should run. */
+function scheduleSync(
+  env: Env,
+  ctx: ExecutionContext,
+  lead: RawLeadFields,
+  source: LeadSource,
+  gate: SyncGateResult,
+  slackOk: boolean,
+): void {
+  if (!gate.shouldSync) return;
+  ctx.waitUntil(
+    runSync({
+      apiKey: env.ATTIO_API_KEY!,
+      slackWebhookUrl: env.SLACK_WEBHOOK_URL!,
+      postToSlack,
+      suppressFailureNotice: !slackOk,
+      lead,
+      identity: gate.identity,
+      source,
+    }),
+  );
+}
+
 async function handleRpcLead(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
   const blocked = precheck(request, env.SLACK_WEBHOOK_URL, "rpc-lead");
   if (blocked) return blocked;
@@ -127,20 +150,7 @@ async function handleRpcLead(request: Request, env: Env, ctx: ExecutionContext):
 
   const gate = evaluateSyncGate(env.ATTIO_API_KEY, DEAL_OWNER_EMAIL, lead);
   const ok = await postToSlack(env.SLACK_WEBHOOK_URL!, buildRpcLeadMessage(lead, gate.statusMarker));
-
-  if (gate.shouldSync) {
-    ctx.waitUntil(
-      runSync({
-        apiKey: env.ATTIO_API_KEY!,
-        slackWebhookUrl: env.SLACK_WEBHOOK_URL!,
-        postToSlack,
-        suppressFailureNotice: !ok,
-        lead,
-        identity: gate.identity,
-        source: "RPC endpoint",
-      }),
-    );
-  }
+  scheduleSync(env, ctx, lead, "RPC endpoint", gate, ok);
 
   return ok ? json({ success: true }) : json({ error: "Failed to deliver lead" }, 502);
 }
@@ -161,20 +171,7 @@ async function handleContact(request: Request, env: Env, ctx: ExecutionContext):
 
   const gate = evaluateSyncGate(env.ATTIO_API_KEY, DEAL_OWNER_EMAIL, contact);
   const ok = await postToSlack(env.SLACK_WEBHOOK_URL!, buildContactMessage(contact, gate.statusMarker));
-
-  if (gate.shouldSync) {
-    ctx.waitUntil(
-      runSync({
-        apiKey: env.ATTIO_API_KEY!,
-        slackWebhookUrl: env.SLACK_WEBHOOK_URL!,
-        postToSlack,
-        suppressFailureNotice: !ok,
-        lead: contact,
-        identity: gate.identity,
-        source: "Contact form",
-      }),
-    );
-  }
+  scheduleSync(env, ctx, contact, "Contact form", gate, ok);
 
   return ok ? json({ success: true }) : json({ error: "Failed to deliver message" }, 502);
 }

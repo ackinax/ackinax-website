@@ -13,6 +13,9 @@ const E164_RE = /^\+[1-9]\d{7,14}$/;
 
 export type MatchKeyKind = "email" | "telegram" | "phone";
 
+/** KTD2's canonical precedence order - the single place this ordering is defined. */
+export const MATCH_KEY_KINDS: readonly MatchKeyKind[] = ["email", "telegram", "phone"];
+
 export interface MatchKey {
   kind: MatchKeyKind;
   value: string;
@@ -73,10 +76,11 @@ export function normalizeIdentity(fields: {
   };
 }
 
-/** KTD2 precedence: email, then Telegram, then phone. Never name. First present wins. */
+/** KTD2 precedence, via MATCH_KEY_KINDS: email, then Telegram, then phone. Never name. First present wins. */
 export function chooseMatchKey(identity: NormalizedIdentity): MatchKey | undefined {
-  if (identity.email) return { kind: "email", value: identity.email };
-  if (identity.telegram) return { kind: "telegram", value: identity.telegram };
-  if (identity.phone) return { kind: "phone", value: identity.phone };
+  for (const kind of MATCH_KEY_KINDS) {
+    const value = identity[kind];
+    if (value) return { kind, value };
+  }
   return undefined;
 }

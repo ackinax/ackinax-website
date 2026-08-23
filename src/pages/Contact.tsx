@@ -7,16 +7,19 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
-
-const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+import { EMAIL_RE, FIELD_LIMITS } from "@/lib/leadFields";
 
 const contactSchema = z
   .object({
-    name: z.string().trim().max(100, "Name must be under 100 characters").optional(),
-    email: z.string().trim().max(255, "Email must be under 255 characters").optional(),
-    telegram: z.string().trim().max(64, "Keep this under 64 characters").optional(),
-    phone: z.string().trim().max(32, "Keep this under 32 characters").optional(),
-    message: z.string().trim().min(1, "Message is required").max(2000, "Message must be under 2000 characters"),
+    name: z.string().trim().max(FIELD_LIMITS.name, "Name must be under 100 characters").optional(),
+    email: z.string().trim().max(FIELD_LIMITS.email, "Email must be under 255 characters").optional(),
+    telegram: z.string().trim().max(FIELD_LIMITS.telegram, "Keep this under 64 characters").optional(),
+    phone: z.string().trim().max(FIELD_LIMITS.phone, "Keep this under 32 characters").optional(),
+    message: z
+      .string()
+      .trim()
+      .min(1, "Message is required")
+      .max(FIELD_LIMITS.message, "Message must be under 2000 characters"),
   })
   .superRefine((data, ctx) => {
     if (data.email && !EMAIL_RE.test(data.email)) {
