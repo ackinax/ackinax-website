@@ -1,4 +1,7 @@
 import { z } from "zod";
+import { EMAIL_RE, FIELD_LIMITS } from "@/lib/leadFields";
+
+export { EMAIL_RE, FIELD_LIMITS };
 
 /** Email we fall back to when the lead function isn't reachable. */
 export const FALLBACK_EMAIL = "talk@ackinax.com";
@@ -11,18 +14,20 @@ export const TIER_OPTIONS = [
   "Not sure yet",
 ] as const;
 
-const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
 export const rpcLeadSchema = z
   .object({
-    name: z.string().trim().max(100, "Name must be under 100 characters").optional(),
-    email: z.string().trim().max(255, "Email must be under 255 characters").optional(),
-    telegram: z.string().trim().max(64, "Keep this under 64 characters").optional(),
-    phone: z.string().trim().max(32, "Keep this under 32 characters").optional(),
-    project: z.string().trim().max(120, "Keep this under 120 characters").optional(),
-    tier: z.string().trim().max(80).optional(),
-    volume: z.string().trim().max(120, "Keep this under 120 characters").optional(),
-    message: z.string().trim().min(1, "Tell us a little about your use case").max(2000, "Message must be under 2000 characters"),
+    name: z.string().trim().max(FIELD_LIMITS.name, "Name must be under 100 characters").optional(),
+    email: z.string().trim().max(FIELD_LIMITS.email, "Email must be under 255 characters").optional(),
+    telegram: z.string().trim().max(FIELD_LIMITS.telegram, "Keep this under 64 characters").optional(),
+    phone: z.string().trim().max(FIELD_LIMITS.phone, "Keep this under 32 characters").optional(),
+    project: z.string().trim().max(FIELD_LIMITS.project, "Keep this under 120 characters").optional(),
+    tier: z.string().trim().max(FIELD_LIMITS.tier).optional(),
+    volume: z.string().trim().max(FIELD_LIMITS.volume, "Keep this under 120 characters").optional(),
+    message: z
+      .string()
+      .trim()
+      .min(1, "Tell us a little about your use case")
+      .max(FIELD_LIMITS.message, "Message must be under 2000 characters"),
   })
   .superRefine((data, ctx) => {
     if (data.email && !EMAIL_RE.test(data.email)) {

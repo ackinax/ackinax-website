@@ -12,28 +12,11 @@
  * `run_worker_first: ["/api/*"]`, so asset and SPA routes never hit this script.
  */
 
+import { parseRpcLead, parseContactChannels, isValidationError, type RpcLead, type ContactMessage } from "./lead";
+
 interface Env {
   ASSETS: { fetch(request: Request): Promise<Response> };
   SLACK_WEBHOOK_URL?: string;
-}
-
-interface RpcLead {
-  name?: string;
-  email?: string;
-  telegram?: string;
-  phone?: string;
-  project?: string;
-  tier?: string;
-  volume?: string;
-  message: string;
-}
-
-interface ContactMessage {
-  name?: string;
-  email?: string;
-  telegram?: string;
-  phone?: string;
-  message: string;
 }
 
 // Best-effort, per-isolate rate limit — a soft guard against casual abuse.
@@ -55,8 +38,6 @@ function json(body: unknown, status = 200): Response {
     headers: { "Content-Type": "application/json" },
   });
 }
-
-const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 async function postToSlack(webhook: string, payload: unknown): Promise<boolean> {
   const res = await fetch(webhook, {
@@ -123,30 +104,15 @@ async function handleRpcLead(request: Request, env: Env): Promise<Response> {
   const blocked = precheck(request, env.SLACK_WEBHOOK_URL, "rpc-lead");
   if (blocked) return blocked;
 
-  let body: RpcLead;
+  let body: Partial<RpcLead>;
   try {
-    body = (await request.json()) as RpcLead;
+    body = (await request.json()) as Partial<RpcLead>;
   } catch {
     return json({ error: "Invalid request" }, 400);
   }
 
-  if (!body.message?.trim()) return json({ error: "A message is required" }, 400);
-  const email = body.email?.trim();
-  if (!email && !body.telegram?.trim() && !body.phone?.trim()) {
-    return json({ error: "Provide at least one contact method" }, 400);
-  }
-  if (email && !EMAIL_RE.test(email)) return json({ error: "Invalid email" }, 400);
-
-  const lead: RpcLead = {
-    name: body.name?.trim().slice(0, 100),
-    email: email?.slice(0, 255),
-    telegram: body.telegram?.trim().slice(0, 64),
-    phone: body.phone?.trim().slice(0, 32),
-    project: body.project?.trim().slice(0, 120),
-    tier: body.tier?.trim().slice(0, 80),
-    volume: body.volume?.trim().slice(0, 120),
-    message: body.message.trim().slice(0, 2000),
-  };
+  const lead = parseRpcLead(body);
+  if (isValidationError(lead)) return json({ error: lead.error }, lead.status);
 
   const ok = await postToSlack(env.SLACK_WEBHOOK_URL!, buildRpcLeadMessage(lead));
   return ok ? json({ success: true }) : json({ error: "Failed to deliver lead" }, 502);
@@ -156,37 +122,26 @@ async function handleContact(request: Request, env: Env): Promise<Response> {
   const blocked = precheck(request, env.SLACK_WEBHOOK_URL, "contact");
   if (blocked) return blocked;
 
-  let body: ContactMessage;
+  let body: Partial<ContactMessage>;
   try {
-    body = (await request.json()) as ContactMessage;
+    body = (await request.json()) as Partial<ContactMessage>;
   } catch {
     return json({ error: "Invalid request" }, 400);
   }
 
-  if (!body.message?.trim()) return json({ error: "A message is required" }, 400);
-  const email = body.email?.trim();
-  if (!email && !body.telegram?.trim() && !body.phone?.trim()) {
-    return json({ error: "Provide at least one contact method" }, 400);
-  }
-  if (email && !EMAIL_RE.test(email)) return json({ error: "Invalid email" }, 400);
-
-  const contact: ContactMessage = {
-    name: body.name?.trim().slice(0, 100),
-    email: email?.slice(0, 255),
-    telegram: body.telegram?.trim().slice(0, 64),
-    phone: body.phone?.trim().slice(0, 32),
-    message: body.message.trim().slice(0, 2000),
-  };
+  const contact = parseContactChannels(body);
+  if (isValidationError(contact)) return json({ error: contact.error }, contact.status);
 
   const ok = await postToSlack(env.SLACK_WEBHOOK_URL!, buildContactMessage(contact));
   return ok ? json({ success: true }) : json({ error: "Failed to deliver message" }, 502);
 }
 
 export default {
-  async fetch(request: Request, env: Env): Promise<Response> {
+  async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
+    void ctx; // wired up in U7, once the Attio sync exists to schedule via ctx.waitUntil
     const url = new URL(request.url);
     if (url.pathname === "/api/rpc-lead") return handleRpcLead(request, env);
     if (url.pathname === "/api/contact") return handleContact(request, env);
     return env.ASSETS.fetch(request);
   },
-};
+} satisfies ExportedHandler<Env>;
