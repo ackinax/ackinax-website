@@ -4,9 +4,9 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
+import FormField from "@/components/FormField";
 import { EMAIL_RE, FIELD_LIMITS } from "@/lib/leadFields";
 
 const contactSchema = z
@@ -110,7 +110,7 @@ export default function Contact() {
           </p>
 
           <form onSubmit={handleSubmit} className="space-y-5">
-            <Field label="Message" error={errors.message}>
+            <FormField label="Message" error={errors.message}>
               <Textarea
                 value={form.message}
                 onChange={(e) => handleChange("message", e.target.value)}
@@ -118,7 +118,7 @@ export default function Contact() {
                 rows={5}
                 maxLength={2000}
               />
-            </Field>
+            </FormField>
 
             <div className="space-y-5 pt-5 border-t border-border">
               <div>
@@ -126,7 +126,7 @@ export default function Contact() {
                 <p className="font-body text-xs text-muted-foreground mt-1">Add at least one: email, Telegram or phone.</p>
               </div>
               <div className="grid sm:grid-cols-2 gap-5">
-                <Field label="Email" error={errors.email}>
+                <FormField label="Email" error={errors.email}>
                   <Input
                     type="email"
                     value={form.email}
@@ -134,18 +134,18 @@ export default function Contact() {
                     placeholder="you@example.com"
                     maxLength={255}
                   />
-                </Field>
-                <Field label="Telegram" error={errors.telegram}>
+                </FormField>
+                <FormField label="Telegram" error={errors.telegram}>
                   <Input
                     value={form.telegram}
                     onChange={(e) => handleChange("telegram", e.target.value)}
                     placeholder="@username"
                     maxLength={64}
                   />
-                </Field>
+                </FormField>
               </div>
               <div className="grid sm:grid-cols-2 gap-5">
-                <Field label="Phone" error={errors.phone} hint="Include your country code, e.g. +41 79 123 45 67">
+                <FormField label="Phone" error={errors.phone} hint="Include your country code, e.g. +41 79 123 45 67">
                   <Input
                     type="tel"
                     value={form.phone}
@@ -153,15 +153,15 @@ export default function Contact() {
                     placeholder="+1 555 000 0000"
                     maxLength={32}
                   />
-                </Field>
-                <Field label="Name" error={errors.name}>
+                </FormField>
+                <FormField label="Name" error={errors.name}>
                   <Input
                     value={form.name}
                     onChange={(e) => handleChange("name", e.target.value)}
                     placeholder="Your name"
                     maxLength={100}
                   />
-                </Field>
+                </FormField>
               </div>
             </div>
 
@@ -178,26 +178,3 @@ export default function Contact() {
   );
 }
 
-function Field({
-  label,
-  error,
-  hint,
-  children,
-}: {
-  label: string;
-  error?: string;
-  hint?: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <div className="space-y-1.5">
-      <Label className="font-body text-sm text-foreground">{label}</Label>
-      {children}
-      {error ? (
-        <p className="text-destructive text-xs font-body">{error}</p>
-      ) : (
-        hint && <p className="text-muted-foreground text-xs font-body">{hint}</p>
-      )}
-    </div>
-  );
-}

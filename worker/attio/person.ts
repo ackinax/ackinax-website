@@ -13,6 +13,7 @@ import { MATCH_KEY_KINDS, type MatchKeyKind, type NormalizedIdentity } from "../
 interface AttioPersonRecord {
   id: { record_id: string };
   values: {
+    name?: Array<{ full_name?: string }>;
     email_addresses?: Array<{ email_address?: string }>;
     telegram?: Array<{ value?: string }>;
     phone_numbers?: Array<{ phone_number?: string }>;
@@ -56,20 +57,42 @@ async function queryPeopleOnce(client: AttioClient, identity: NormalizedIdentity
   });
 }
 
+function storedEmails(record: AttioPersonRecord): string[] {
+  return (record.values.email_addresses ?? [])
+    .map((e) => e.email_address?.toLowerCase())
+    .filter((e): e is string => Boolean(e));
+}
+
+function storedTelegram(record: AttioPersonRecord): string | undefined {
+  return record.values.telegram?.[0]?.value?.toLowerCase();
+}
+
+function storedName(record: AttioPersonRecord): string | undefined {
+  return record.values.name?.[0]?.full_name;
+}
+
 /** Which of the submission's identifiers this record's stored values already carry. */
 function matchedIdentifiers(record: AttioPersonRecord, identity: NormalizedIdentity): Set<MatchKeyKind> {
   const matched = new Set<MatchKeyKind>();
 
-  const emails = (record.values.email_addresses ?? []).map((e) => e.email_address?.toLowerCase());
-  if (identity.email && emails.includes(identity.email)) matched.add("email");
-
-  const handles = (record.values.telegram ?? []).map((t) => t.value?.toLowerCase());
-  if (identity.telegram && handles.includes(identity.telegram)) matched.add("telegram");
+  if (identity.email && storedEmails(record).includes(identity.email)) matched.add("email");
+  if (identity.telegram && storedTelegram(record) === identity.telegram) matched.add("telegram");
 
   const phones = (record.values.phone_numbers ?? []).map((p) => p.phone_number);
   if (identity.phone && phones.includes(identity.phone)) matched.add("phone");
 
   return matched;
+}
+
+/**
+ * A record only *conflicts* on email when it already stores a different one -
+ * a secondary-identifier match against a record with no email on file yet is
+ * not a conflict, it's the submission's first time providing one (KTD3).
+ */
+function hasConflictingEmail(record: AttioPersonRecord, identity: NormalizedIdentity): boolean {
+  if (!identity.email) return false;
+  const emails = storedEmails(record);
+  return emails.length > 0 && !emails.includes(identity.email);
 }
 
 /** KTD2, via MATCH_KEY_KINDS: email outranks Telegram outranks phone. */
@@ -78,13 +101,28 @@ function precedenceRank(matched: Set<MatchKeyKind>): number {
   return index === -1 ? MATCH_KEY_KINDS.length : index;
 }
 
-function buildValues(name: string | undefined, identity: NormalizedIdentity, restrictTo?: Set<MatchKeyKind>) {
+/**
+ * `existing` is only present when patching a matched record. name and
+ * telegram are single-value Attio attributes - a PATCH *replaces* them
+ * rather than appending, unlike the multiselect email/phone arrays - so
+ * both are only written when the record doesn't already have a different
+ * value on file. Writing them unconditionally would silently overwrite an
+ * established contact's name or handle (R4).
+ */
+function buildValues(
+  name: string | undefined,
+  identity: NormalizedIdentity,
+  restrictTo: Set<MatchKeyKind> | undefined,
+  existing?: { name?: string; telegram?: string },
+) {
   const values: Record<string, unknown> = {};
   const include = (kind: MatchKeyKind) => !restrictTo || restrictTo.has(kind);
 
-  if (name) values.name = { full_name: name };
+  if (name && !existing?.name) values.name = { full_name: name };
   if (identity.email && include("email")) values.email_addresses = [identity.email];
-  if (identity.telegram && include("telegram")) values.telegram = identity.telegram;
+  if (identity.telegram && include("telegram") && (!existing?.telegram || existing.telegram === identity.telegram)) {
+    values.telegram = identity.telegram;
+  }
   // A phone that failed normalization is already absent from `identity` - KTD8's
   // "never send a malformed phone" falls out of building from normalized identity.
   if (identity.phone && include("phone")) values.phone_numbers = [identity.phone];
@@ -93,7 +131,7 @@ function buildValues(name: string | undefined, identity: NormalizedIdentity, res
 }
 
 async function createPerson(client: AttioClient, input: PersonInput, possibleDuplicate: boolean): Promise<PersonResult> {
-  const values = buildValues(input.name, input.identity);
+  const values = buildValues(input.name, input.identity, undefined);
   const result = await client.post<{ id: { record_id: string } }>("/v2/objects/people/records", { data: { values } });
   if (!result.ok) return { ok: false, error: describeFailure(result) };
   return {
@@ -104,14 +142,15 @@ async function createPerson(client: AttioClient, input: PersonInput, possibleDup
 
 async function patchPerson(
   client: AttioClient,
-  recordId: string,
+  record: AttioPersonRecord,
   input: PersonInput,
   restrictTo: Set<MatchKeyKind> | undefined,
   alreadyMatched: Set<MatchKeyKind>,
   possibleDuplicate: boolean,
 ): Promise<PersonResult> {
-  const values = buildValues(input.name, input.identity, restrictTo);
-  const result = await client.patch<{ id: { record_id: string } }>(`/v2/objects/people/records/${recordId}`, {
+  const existing = { name: storedName(record), telegram: storedTelegram(record) };
+  const values = buildValues(input.name, input.identity, restrictTo, existing);
+  const result = await client.patch<{ id: { record_id: string } }>(`/v2/objects/people/records/${record.id.record_id}`, {
     data: { values },
   });
   if (!result.ok) return { ok: false, error: describeFailure(result) };
@@ -121,7 +160,7 @@ async function patchPerson(
   );
   const newlyAddedIdentifiers = written.filter((kind) => !alreadyMatched.has(kind));
 
-  return { ok: true, person: { recordId, action: "patched", possibleDuplicate, newlyAddedIdentifiers } };
+  return { ok: true, person: { recordId: record.id.record_id, action: "patched", possibleDuplicate, newlyAddedIdentifiers } };
 }
 
 export async function resolvePerson(client: AttioClient, input: PersonInput): Promise<PersonResult> {
@@ -136,17 +175,15 @@ export async function resolvePerson(client: AttioClient, input: PersonInput): Pr
 
   if (records.length === 1) {
     const record = records[0];
-    const matched = matchedIdentifiers(record, input.identity);
-    const matchedViaSecondaryOnly = !matched.has("email") && (matched.has("telegram") || matched.has("phone"));
-    const conflictsOnEmail = matchedViaSecondaryOnly && input.identity.email !== undefined;
 
-    if (conflictsOnEmail) {
-      // KTD3: a different email on a secondary-identifier match means a
+    if (hasConflictingEmail(record, input.identity)) {
+      // KTD3: the record already has a *different* email on file - a
       // different human - do not append a stranger's address to this record.
       return createPerson(client, input, true);
     }
 
-    return patchPerson(client, record.id.record_id, input, undefined, matched, false);
+    const matched = matchedIdentifiers(record, input.identity);
+    return patchPerson(client, record, input, undefined, matched, false);
   }
 
   // Multiple matches: select by KTD2 precedence, and never write an
@@ -156,6 +193,12 @@ export async function resolvePerson(client: AttioClient, input: PersonInput): Pr
     .map((record) => ({ record, matched: matchedIdentifiers(record, input.identity) }))
     .sort((a, b) => precedenceRank(a.matched) - precedenceRank(b.matched));
   const selected = ranked[0];
+
+  if (hasConflictingEmail(selected.record, input.identity)) {
+    // Same rule as the single-match case: the highest-precedence candidate
+    // already carries a different email, so it belongs to a different human.
+    return createPerson(client, input, true);
+  }
 
   const claimedByOthers = new Set<MatchKeyKind>();
   for (const { record, matched } of ranked) {
@@ -167,5 +210,5 @@ export async function resolvePerson(client: AttioClient, input: PersonInput): Pr
     MATCH_KEY_KINDS.filter((kind) => input.identity[kind] !== undefined && !claimedByOthers.has(kind)),
   );
 
-  return patchPerson(client, selected.record.id.record_id, input, restrictTo, selected.matched, true);
+  return patchPerson(client, selected.record, input, restrictTo, selected.matched, true);
 }

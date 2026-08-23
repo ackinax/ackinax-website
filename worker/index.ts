@@ -43,12 +43,20 @@ function json(body: unknown, status = 200): Response {
 }
 
 async function postToSlack(webhook: string, payload: unknown): Promise<boolean> {
-  const res = await fetch(webhook, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload),
-  });
-  return res.ok;
+  try {
+    const res = await fetch(webhook, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+      signal: AbortSignal.timeout(5_000),
+    });
+    return res.ok;
+  } catch {
+    // A network failure or timeout must resolve to false, not throw - this
+    // call sits on the request path before scheduleSync, and an unhandled
+    // rejection here would lose the lead from both Slack and the CRM sync.
+    return false;
+  }
 }
 
 /** Shared guard for the form routes: POST only, rate-limited, webhook configured. */

@@ -40,6 +40,12 @@ describe("parseContactChannels", () => {
     expect(isValidationError(result)).toBe(false);
   });
 
+  it("rejects an email over 255 characters rather than truncating it", () => {
+    const longEmail = `${"a".repeat(250)}@b.com`; // valid shape, over the limit
+    const result = parseContactChannels({ email: longEmail, message: "hi" });
+    expect(isValidationError(result)).toBe(true);
+  });
+
   it("rejects a malformed email", () => {
     const result = parseContactChannels({ email: "not-an-email", message: "hi" });
     expect(isValidationError(result)).toBe(true);

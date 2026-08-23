@@ -1,10 +1,10 @@
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { FALLBACK_EMAIL, TIER_OPTIONS, rpcLeadSchema, type RpcLead } from "@/lib/rpcLead";
 import { Loader2 } from "lucide-react";
+import FormField from "@/components/FormField";
 
 const EMPTY: RpcLead = { name: "", email: "", telegram: "", phone: "", project: "", tier: "", volume: "", message: "" };
 
@@ -69,7 +69,7 @@ export default function RpcLeadForm({ defaultTier = "", id }: { defaultTier?: st
 
   return (
     <form id={id} onSubmit={handleSubmit} className="card-base space-y-5">
-      <LeadField label="Use case" error={errors.message}>
+      <FormField label="Use case" error={errors.message}>
         <Textarea
           value={form.message}
           onChange={(e) => update("message", e.target.value)}
@@ -77,13 +77,13 @@ export default function RpcLeadForm({ defaultTier = "", id }: { defaultTier?: st
           rows={4}
           maxLength={2000}
         />
-      </LeadField>
+      </FormField>
 
       <div className="grid sm:grid-cols-2 gap-5">
-        <LeadField label="Project / company" error={errors.project}>
+        <FormField label="Project / company" error={errors.project}>
           <Input value={form.project} onChange={(e) => update("project", e.target.value)} placeholder="What are you building?" maxLength={120} />
-        </LeadField>
-        <LeadField label="Tier of interest" error={errors.tier}>
+        </FormField>
+        <FormField label="Tier of interest" error={errors.tier}>
           <select
             value={form.tier}
             onChange={(e) => update("tier", e.target.value)}
@@ -94,12 +94,12 @@ export default function RpcLeadForm({ defaultTier = "", id }: { defaultTier?: st
               <option key={t} value={t}>{t}</option>
             ))}
           </select>
-        </LeadField>
+        </FormField>
       </div>
 
-      <LeadField label="Expected volume (RPS or requests/month)" error={errors.volume}>
+      <FormField label="Expected volume (RPS or requests/month)" error={errors.volume}>
         <Input value={form.volume} onChange={(e) => update("volume", e.target.value)} placeholder="e.g. ~150 RPS sustained, or 200M req/mo" maxLength={120} />
-      </LeadField>
+      </FormField>
 
       <div className="space-y-5 pt-5 border-t border-border">
         <div>
@@ -107,20 +107,20 @@ export default function RpcLeadForm({ defaultTier = "", id }: { defaultTier?: st
           <p className="font-body text-xs text-muted-foreground mt-1">Add at least one: email, Telegram or phone.</p>
         </div>
         <div className="grid sm:grid-cols-2 gap-5">
-          <LeadField label="Email" error={errors.email}>
+          <FormField label="Email" error={errors.email}>
             <Input type="email" value={form.email} onChange={(e) => update("email", e.target.value)} placeholder="you@example.com" maxLength={255} />
-          </LeadField>
-          <LeadField label="Telegram" error={errors.telegram}>
+          </FormField>
+          <FormField label="Telegram" error={errors.telegram}>
             <Input value={form.telegram} onChange={(e) => update("telegram", e.target.value)} placeholder="@username" maxLength={64} />
-          </LeadField>
+          </FormField>
         </div>
         <div className="grid sm:grid-cols-2 gap-5">
-          <LeadField label="Phone" error={errors.phone} hint="Include your country code, e.g. +41 79 123 45 67">
+          <FormField label="Phone" error={errors.phone} hint="Include your country code, e.g. +41 79 123 45 67">
             <Input type="tel" value={form.phone} onChange={(e) => update("phone", e.target.value)} placeholder="+1 555 000 0000" maxLength={32} />
-          </LeadField>
-          <LeadField label="Name" error={errors.name}>
+          </FormField>
+          <FormField label="Name" error={errors.name}>
             <Input value={form.name} onChange={(e) => update("name", e.target.value)} placeholder="Your name" maxLength={100} />
-          </LeadField>
+          </FormField>
         </div>
       </div>
 
@@ -132,26 +132,3 @@ export default function RpcLeadForm({ defaultTier = "", id }: { defaultTier?: st
   );
 }
 
-function LeadField({
-  label,
-  error,
-  hint,
-  children,
-}: {
-  label: string;
-  error?: string;
-  hint?: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <div className="space-y-1.5">
-      <Label className="font-body text-sm text-foreground">{label}</Label>
-      {children}
-      {error ? (
-        <p className="text-destructive text-xs font-body">{error}</p>
-      ) : (
-        hint && <p className="text-muted-foreground text-xs font-body">{hint}</p>
-      )}
-    </div>
-  );
-}

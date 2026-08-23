@@ -247,4 +247,57 @@ describe("resolveDealAndAttachNote", () => {
     expect(result.ok).toBe(true);
     expect(queryCalls).toBe(2);
   });
+
+  it("resolves to failure when the Deal create fails, and posts no Note", async () => {
+    const client = fakeClient();
+    client.post.mockImplementation(async (path: string) => {
+      if (path.endsWith("/records/query")) return ok([]);
+      if (path === "/v2/objects/deals/records") return fail(500, "create failed");
+      throw new Error(`unexpected call to ${path}`);
+    });
+
+    const result = await resolveDealAndAttachNote(client, baseInput());
+
+    expect(result.ok).toBe(false);
+    expect(client.post).not.toHaveBeenCalledWith("/v2/notes", expect.anything());
+  });
+
+  it("resolves to failure when the Note attach fails, even though the Deal was created", async () => {
+    const client = fakeClient();
+    client.post.mockImplementation(async (path: string) => {
+      if (path.endsWith("/records/query")) return ok([]);
+      if (path === "/v2/objects/deals/records") return ok({ id: { record_id: "deal-1" } });
+      if (path === "/v2/notes") return fail(500, "note failed");
+      throw new Error(`unexpected call to ${path}`);
+    });
+
+    const result = await resolveDealAndAttachNote(client, baseInput());
+
+    expect(result.ok).toBe(false);
+  });
+
+  describe("findOpenDeal fails closed on an unreadable stage", () => {
+    const cases: Array<[string, unknown]> = [
+      ["missing values.stage entirely", { id: { record_id: "deal-1" }, values: {} }],
+      ["an empty stage array", { id: { record_id: "deal-1" }, values: { stage: [] } }],
+      ["a malformed status shape", { id: { record_id: "deal-1" }, values: { stage: [{ status: {} }] } }],
+      ["an unrecognized stage title", dealRecord("deal-1", "Some Future Stage")],
+    ];
+
+    for (const [description, malformedRecord] of cases) {
+      it(`treats ${description} as not-open, and opens a new Deal instead`, async () => {
+        const client = fakeClient();
+        client.post.mockImplementation(async (path: string) => {
+          if (path.endsWith("/records/query")) return ok([malformedRecord]);
+          if (path === "/v2/objects/deals/records") return ok({ id: { record_id: "new-deal" } });
+          return ok({ id: { note_id: "note-1" } });
+        });
+
+        const result = await resolveDealAndAttachNote(client, baseInput());
+
+        expect(result.ok).toBe(true);
+        if (result.ok) expect(result.deal.action).toBe("created");
+      });
+    }
+  });
 });

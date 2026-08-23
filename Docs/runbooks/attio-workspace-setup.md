@@ -32,6 +32,11 @@ owner.
      `object_configuration:read`, `note:read-write`. This is the one placed
      via `wrangler secret put ATTIO_API_KEY` and mirrored into `.dev.vars`
      for local `wrangler dev` runs (`.dev.vars` is already gitignored).
+     **Do not set this as a production Worker secret until KD7's spam
+     hardening (Turnstile, honeypot, the `ratelimit` binding) has shipped** -
+     until then the sync must stay off by the plan's own design, and setting
+     the key alone would turn writes on. `.dev.vars` for local `wrangler dev`
+     is fine in the meantime.
    - **Rotation:** record the date each key was issued below. Rotate the
      runtime key immediately if it is ever exposed (logs, a misconfigured
      error response, a compromised deploy credential) - `wrangler secret put`

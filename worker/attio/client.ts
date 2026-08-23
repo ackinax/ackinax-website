@@ -19,7 +19,11 @@ export interface AttioFailure {
 export type AttioResult<T = unknown> = AttioSuccess<T> | AttioFailure;
 
 const DEFAULT_BASE_URL = "https://api.attio.com";
-const TIMEOUT_MS = 5_000;
+// The worst-case chain (Person query, patch/create, Deal query, create,
+// Note create) is 5 calls, and the two queries may each retry once (KTD4) -
+// 7 calls at this timeout must stay comfortably inside the 30s ctx.waitUntil
+// budget (KTD5): 7 x 3s = 21s.
+const TIMEOUT_MS = 3_000;
 const MAX_ERROR_LENGTH = 200;
 
 export interface AttioClientConfig {
@@ -50,10 +54,18 @@ export function describeFailure(result: AttioFailure): string {
   return result.message ?? `Attio request failed with status ${result.status}`;
 }
 
-/** KTD4: reads may retry once on failure; writes never do (never wrap a write call in this). */
+function isRetryable(failure: AttioFailure): boolean {
+  // Retry network failures/timeouts (status 0) and anything Attio itself
+  // says is transient (429, 5xx). A deterministic 4xx means retrying would
+  // just reproduce the same failure - KTD4's intent is retrying transient
+  // failures, not every failure.
+  return failure.status === 0 || failure.status === 429 || failure.status >= 500;
+}
+
+/** KTD4: reads may retry once on a transient failure; writes never do (never wrap a write call in this). */
 export async function retryOnce<T>(attempt: () => Promise<AttioResult<T>>): Promise<AttioResult<T>> {
   const first = await attempt();
-  if (first.ok) return first;
+  if (first.ok || !isRetryable(first)) return first;
   return attempt();
 }
 

@@ -40,8 +40,11 @@ export interface SyncGateResult {
 export function evaluateSyncGate(apiKey: string | undefined, dealOwnerEmail: string, lead: RawLeadFields): SyncGateResult {
   const identity = normalizeIdentity(lead);
 
-  if (!apiKey || !dealOwnerEmail) {
+  if (!apiKey) {
     return { shouldSync: false, statusMarker: "CRM: skipped - no key", identity };
+  }
+  if (!dealOwnerEmail) {
+    return { shouldSync: false, statusMarker: "CRM: skipped - no deal owner", identity };
   }
   if (!chooseMatchKey(identity)) {
     return { shouldSync: false, statusMarker: "CRM: skipped - no match key", identity };
@@ -76,20 +79,31 @@ function identifyLead(lead: RawLeadFields, identity: NormalizedIdentity): string
   return lead.name || identity.email || identity.telegram || identity.phone || "unknown lead";
 }
 
-async function notifyFailure(options: RunSyncOptions, step: string, error: string): Promise<void> {
+async function notifyFailure(
+  options: RunSyncOptions,
+  step: string,
+  error: string,
+  contactCreated: boolean,
+): Promise<void> {
   if (options.suppressFailureNotice) return;
 
   const now = Date.now();
   const includeDetail = now - lastDetailedFailureAt >= RATE_WINDOW_MS;
-  if (includeDetail) lastDetailedFailureAt = now;
 
   const identifier = identifyLead(options.lead, options.identity);
-  const text = includeDetail
-    ? `⚠️ CRM sync failed - not synced: ${identifier}\nStep: ${step}\n${error}`
+  // "not synced" is only accurate when nothing was written at all - when the
+  // Person already landed and only the Deal/Note step failed, re-entering
+  // from this notice as if from scratch would duplicate that Person.
+  const headline = contactCreated
+    ? `⚠️ CRM partially synced - contact created but Deal/Note failed: ${identifier}`
     : `⚠️ CRM sync failed - not synced: ${identifier}`;
+  const text = includeDetail ? `${headline}\nStep: ${step}\n${error}` : headline;
 
-  // Never notify about a failed notification - swallow and stop.
-  await options.postToSlack(options.slackWebhookUrl, { text }).catch(() => {});
+  // Never notify about a failed notification - swallow and stop. Only
+  // advance the throttle window once the post is confirmed to have landed,
+  // so a notify that itself failed doesn't consume the next lead's detail.
+  const posted = await options.postToSlack(options.slackWebhookUrl, { text }).catch(() => false);
+  if (includeDetail && posted) lastDetailedFailureAt = now;
 }
 
 async function notifySuccessIfNoteworthy(options: RunSyncOptions, person: PersonOutcome): Promise<void> {
@@ -119,7 +133,7 @@ export async function runSync(options: RunSyncOptions): Promise<void> {
 
     const personResult = await resolvePerson(client, { name: options.lead.name, identity: options.identity });
     if (!personResult.ok) {
-      await notifyFailure(options, "Person", personResult.error);
+      await notifyFailure(options, "Person", personResult.error, false);
       return;
     }
 
@@ -138,12 +152,12 @@ export async function runSync(options: RunSyncOptions): Promise<void> {
     const dealResult = await resolveDealAndAttachNote(client, dealInput);
     if (!dealResult.ok) {
       // The Person write above already landed - only the Deal/Note step failed.
-      await notifyFailure(options, "Deal", dealResult.error);
+      await notifyFailure(options, "Deal", dealResult.error, true);
       return;
     }
 
     await notifySuccessIfNoteworthy(options, personResult.person);
   } catch (err) {
-    await notifyFailure(options, "unexpected", describeError(err));
+    await notifyFailure(options, "unexpected", describeError(err), false);
   }
 }

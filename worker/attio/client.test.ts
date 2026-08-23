@@ -1,5 +1,6 @@
 import { describe, it, expect, vi } from "vitest";
-import { createAttioClient } from "./client";
+import { createAttioClient, retryOnce } from "./client";
+import type { AttioResult } from "./client";
 
 function jsonResponse(status: number, body: unknown): Response {
   return new Response(JSON.stringify(body), { status, headers: { "Content-Type": "application/json" } });
@@ -100,5 +101,67 @@ describe("createAttioClient", () => {
 
     const [, init] = fetchImpl.mock.calls[0];
     expect(init.signal).toBeInstanceOf(AbortSignal);
+  });
+});
+
+describe("retryOnce", () => {
+  function failure(status: number): AttioResult<never> {
+    return { ok: false, status, message: "failed" };
+  }
+
+  it("retries once on a 500 and returns the second attempt", async () => {
+    const attempt = vi.fn<() => Promise<AttioResult<string>>>()
+      .mockResolvedValueOnce(failure(500))
+      .mockResolvedValueOnce({ ok: true, data: "second" });
+
+    const result = await retryOnce(attempt);
+
+    expect(attempt).toHaveBeenCalledTimes(2);
+    expect(result).toEqual({ ok: true, data: "second" });
+  });
+
+  it("retries once on a network failure (status 0)", async () => {
+    const attempt = vi.fn<() => Promise<AttioResult<string>>>()
+      .mockResolvedValueOnce(failure(0))
+      .mockResolvedValueOnce({ ok: true, data: "second" });
+
+    await retryOnce(attempt);
+
+    expect(attempt).toHaveBeenCalledTimes(2);
+  });
+
+  it("retries once on a 429", async () => {
+    const attempt = vi.fn<() => Promise<AttioResult<string>>>()
+      .mockResolvedValueOnce(failure(429))
+      .mockResolvedValueOnce({ ok: true, data: "second" });
+
+    await retryOnce(attempt);
+
+    expect(attempt).toHaveBeenCalledTimes(2);
+  });
+
+  it("does not retry a deterministic 400", async () => {
+    const attempt = vi.fn<() => Promise<AttioResult<string>>>().mockResolvedValue(failure(400));
+
+    const result = await retryOnce(attempt);
+
+    expect(attempt).toHaveBeenCalledTimes(1);
+    expect(result.ok).toBe(false);
+  });
+
+  it("does not retry a 404", async () => {
+    const attempt = vi.fn<() => Promise<AttioResult<string>>>().mockResolvedValue(failure(404));
+
+    await retryOnce(attempt);
+
+    expect(attempt).toHaveBeenCalledTimes(1);
+  });
+
+  it("does not retry on the first success", async () => {
+    const attempt = vi.fn<() => Promise<AttioResult<string>>>().mockResolvedValue({ ok: true, data: "first" });
+
+    await retryOnce(attempt);
+
+    expect(attempt).toHaveBeenCalledTimes(1);
   });
 });

@@ -24,10 +24,11 @@ function fail(status = 500, message = "server error"): AttioResult<never> {
   return { ok: false, status, message };
 }
 
-function record(id: string, values: { email?: string; telegram?: string; phone?: string }) {
+function record(id: string, values: { name?: string; email?: string; telegram?: string; phone?: string }) {
   return {
     id: { record_id: id },
     values: {
+      name: values.name ? [{ full_name: values.name }] : [],
       email_addresses: values.email ? [{ email_address: values.email }] : [],
       telegram: values.telegram ? [{ value: values.telegram }] : [],
       phone_numbers: values.phone ? [{ phone_number: values.phone }] : [],
@@ -243,6 +244,142 @@ describe("resolvePerson", () => {
 
     expect(result.ok).toBe(true);
     if (result.ok) expect(result.person.newlyAddedIdentifiers).toEqual([]);
+  });
+
+  it("does not overwrite an established contact's name on patch", async () => {
+    const existing = record("existing-person", { name: "Ada Lovelace", email: "ada@example.com" });
+    const client = fakeClient();
+    client.post.mockResolvedValue(ok([existing]));
+    client.patch.mockResolvedValue(ok({ id: { record_id: "existing-person" } }));
+
+    const identity: NormalizedIdentity = { email: "ada@example.com" };
+    await resolvePerson(client, { name: "A Different Name", identity });
+
+    const [, body] = client.patch.mock.calls[0] as [string, { data: { values: Record<string, unknown> } }];
+    expect(body.data.values.name).toBeUndefined();
+  });
+
+  it("sets the name on patch when the matched record has none yet", async () => {
+    const existing = record("existing-person", { email: "ada@example.com" }); // no name on file
+    const client = fakeClient();
+    client.post.mockResolvedValue(ok([existing]));
+    client.patch.mockResolvedValue(ok({ id: { record_id: "existing-person" } }));
+
+    const identity: NormalizedIdentity = { email: "ada@example.com" };
+    await resolvePerson(client, { name: "Ada Lovelace", identity });
+
+    const [, body] = client.patch.mock.calls[0] as [string, { data: { values: Record<string, unknown> } }];
+    expect(body.data.values.name).toEqual({ full_name: "Ada Lovelace" });
+  });
+
+  it("always sets the name on create", async () => {
+    const client = fakeClient();
+    client.post.mockImplementation(async (path: string) => {
+      if (path.endsWith("/query")) return ok([]);
+      return ok({ id: { record_id: "new-person" } });
+    });
+
+    await resolvePerson(client, { name: "Ada Lovelace", identity: { email: "ada@example.com" } });
+
+    const createCall = client.post.mock.calls.find(([path]) => !path.endsWith("/query"));
+    const body = createCall![1] as { data: { values: Record<string, unknown> } };
+    expect(body.data.values.name).toEqual({ full_name: "Ada Lovelace" });
+  });
+
+  it("does not replace a stored Telegram handle with a different one on patch (R4)", async () => {
+    // Matched by email; the record already has a DIFFERENT Telegram handle on file.
+    const existing = record("existing-person", { email: "ada@example.com", telegram: "old_handle" });
+    const client = fakeClient();
+    client.post.mockResolvedValue(ok([existing]));
+    client.patch.mockResolvedValue(ok({ id: { record_id: "existing-person" } }));
+
+    const identity: NormalizedIdentity = { email: "ada@example.com", telegram: "new_handle" };
+    await resolvePerson(client, { identity });
+
+    const [, body] = client.patch.mock.calls[0] as [string, { data: { values: Record<string, unknown> } }];
+    // Telegram is single-value in Attio - writing it here would REPLACE, not append.
+    expect(body.data.values.telegram).toBeUndefined();
+  });
+
+  it("still writes the Telegram handle on patch when it matches what's already stored", async () => {
+    const existing = record("existing-person", { email: "ada@example.com", telegram: "same_handle" });
+    const client = fakeClient();
+    client.post.mockResolvedValue(ok([existing]));
+    client.patch.mockResolvedValue(ok({ id: { record_id: "existing-person" } }));
+
+    const identity: NormalizedIdentity = { email: "ada@example.com", telegram: "same_handle" };
+    await resolvePerson(client, { identity });
+
+    const [, body] = client.patch.mock.calls[0] as [string, { data: { values: Record<string, unknown> } }];
+    expect(body.data.values.telegram).toBe("same_handle");
+  });
+
+  it("does not treat a secondary-identifier match with no stored email as a conflict - patches instead of duplicating", async () => {
+    // A Telegram-only contact providing an email for the very first time.
+    const existing = record("telegram-owner", { telegram: "msiimsii" }); // no email on file
+    const client = fakeClient();
+    client.post.mockResolvedValue(ok([existing]));
+    client.patch.mockResolvedValue(ok({ id: { record_id: "telegram-owner" } }));
+
+    const identity: NormalizedIdentity = { telegram: "msiimsii", email: "frank@example.com" };
+    const result = await resolvePerson(client, { identity });
+
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.person.action).toBe("patched");
+      expect(result.person.recordId).toBe("telegram-owner");
+      expect(result.person.newlyAddedIdentifiers).toEqual(["email"]);
+    }
+    expect(client.post).not.toHaveBeenCalledWith("/v2/objects/people/records", expect.anything());
+  });
+
+  it("in the multi-match branch, does not append an email onto a selected record that already has a different one", async () => {
+    // Selected via telegram (highest precedence among the two matches), but
+    // that record already has a DIFFERENT email on file - a real conflict.
+    const telegramOwnerWithOtherEmail = record("telegram-owner", { telegram: "msiimsii", email: "someone-else@example.com" });
+    const phoneOwner = record("phone-owner", { phone: "+353899747961" });
+    const client = fakeClient();
+    client.post.mockImplementation(async (path: string) => {
+      if (path.endsWith("/query")) return ok([phoneOwner, telegramOwnerWithOtherEmail]);
+      return ok({ id: { record_id: "new-person" } });
+    });
+
+    const identity: NormalizedIdentity = {
+      email: "frank@example.com",
+      telegram: "msiimsii",
+      phone: "+353899747961",
+    };
+    const result = await resolvePerson(client, { identity });
+
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.person.action).toBe("created");
+      expect(result.person.possibleDuplicate).toBe(true);
+    }
+    expect(client.patch).not.toHaveBeenCalled();
+  });
+
+  it("a create request failure resolves to failure", async () => {
+    const client = fakeClient();
+    client.post.mockImplementation(async (path: string) => {
+      if (path.endsWith("/query")) return ok([]);
+      return fail(500, "create failed");
+    });
+
+    const result = await resolvePerson(client, { identity: { email: "a@b.com" } });
+
+    expect(result.ok).toBe(false);
+  });
+
+  it("a patch request failure resolves to failure", async () => {
+    const existing = record("existing-person", { email: "a@b.com" });
+    const client = fakeClient();
+    client.post.mockResolvedValue(ok([existing]));
+    client.patch.mockResolvedValue(fail(500, "patch failed"));
+
+    const result = await resolvePerson(client, { identity: { email: "a@b.com" } });
+
+    expect(result.ok).toBe(false);
   });
 
   it("never includes IP or user-agent fields in a request body", async () => {

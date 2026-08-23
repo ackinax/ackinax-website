@@ -181,6 +181,29 @@ describe("POST /api/rpc-lead - Attio sync integration", () => {
     // Only the (failed) lead-message attempt reached Slack - no separate failure notice.
     expect(slackCalls).toHaveLength(1);
   });
+
+  it("still responds and still schedules the sync when the Slack fetch itself rejects (not just a bad response)", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (input: RequestInfo | URL) => {
+        const url = String(input);
+        if (url.startsWith("https://hooks.slack.test")) throw new TypeError("network error");
+        if (url.startsWith("https://api.attio.com")) return jsonResponse(200, { data: [] });
+        throw new Error(`unexpected fetch URL ${url}`);
+      }),
+    );
+    const ctx = fakeCtx();
+
+    const res = await worker.fetch(
+      rpcLeadRequest({ email: "frank@example.com", message: "hello" }, "203.0.113.16"),
+      fakeEnv(),
+      ctx,
+    );
+
+    expect(res.status).toBe(502); // postToSlack resolves false rather than throwing
+    expect(ctx.waitUntilPromises.length).toBeGreaterThan(0); // scheduleSync still ran
+    await Promise.all(ctx.waitUntilPromises);
+  });
 });
 
 describe("POST /api/contact - Attio sync integration", () => {

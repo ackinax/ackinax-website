@@ -55,6 +55,12 @@ describe("evaluateSyncGate", () => {
     expect(gate.statusMarker).toBe("CRM: skipped - no key");
   });
 
+  it("skips with a distinct status marker when the deal owner is unset (the shipped state)", () => {
+    const gate = evaluateSyncGate("secret-key", "", baseLead());
+    expect(gate.shouldSync).toBe(false);
+    expect(gate.statusMarker).toBe("CRM: skipped - no deal owner");
+  });
+
   it("covers AE4: skips with a status marker when the lead has no normalizable identifier", () => {
     const gate = evaluateSyncGate("secret-key", "owner@example.com", {
       phone: "07777 777777",
@@ -137,6 +143,34 @@ describe("runSync", () => {
     expect(secondPayload.text).not.toContain("Step:"); // second failure, same window - detail throttled
   });
 
+  it("does not consume the throttle window when the notify post itself failed to land", async () => {
+    const fetchImpl = vi.fn().mockResolvedValue(jsonResponse(500, { message: "server error" }));
+    // The first notify attempt fails to reach Slack - false, not thrown.
+    const postToSlack = vi.fn().mockResolvedValueOnce(false).mockResolvedValueOnce(true);
+
+    await runSync(
+      baseOptions({
+        fetchImpl,
+        postToSlack,
+        lead: baseLead({ email: "first@example.com" }),
+        identity: { email: "first@example.com" },
+      }),
+    );
+    await runSync(
+      baseOptions({
+        fetchImpl,
+        postToSlack,
+        lead: baseLead({ email: "second@example.com" }),
+        identity: { email: "second@example.com" },
+      }),
+    );
+
+    // Since the first notify never actually landed, the window should not be
+    // considered consumed - the second failure still gets full detail.
+    const [, secondPayload] = postToSlack.mock.calls[1] as [string, { text: string }];
+    expect(secondPayload.text).toContain("Step:");
+  });
+
   it("names the Deal step when the Person write succeeded but the Deal step failed", async () => {
     const fetchImpl = vi.fn(async (input: RequestInfo | URL) => {
       const url = String(input);
@@ -154,6 +188,21 @@ describe("runSync", () => {
 
     const [, payload] = postToSlack.mock.calls[0] as [string, { text: string }];
     expect(payload.text).toContain("Step: Deal");
+    // The Person write already landed - "not synced" would wrongly suggest
+    // nothing happened and risk a duplicate Person on manual re-entry.
+    expect(payload.text).toContain("CRM partially synced");
+    expect(payload.text).not.toContain("not synced");
+  });
+
+  it("uses the plain 'not synced' wording when the Person step itself failed (nothing was written)", async () => {
+    const fetchImpl = vi.fn().mockResolvedValue(jsonResponse(500, { message: "server error" }));
+    const postToSlack = vi.fn().mockResolvedValue(true);
+
+    await runSync(baseOptions({ fetchImpl, postToSlack }));
+
+    const [, payload] = postToSlack.mock.calls[0] as [string, { text: string }];
+    expect(payload.text).toContain("not synced");
+    expect(payload.text).not.toContain("partially synced");
   });
 
   it("stops the sequence at the first failed step - no Deal call after a Person failure", async () => {
@@ -173,9 +222,14 @@ describe("runSync", () => {
   });
 
   it("posts exactly one line when the sync succeeds but flags a possible duplicate", async () => {
+    // The record already has a DIFFERENT email on file - a genuine conflict,
+    // not just "matched via phone and this submission happens to have an email".
     const existingByPhone = {
       id: { record_id: "phone-owner" },
-      values: { phone_numbers: [{ phone_number: "+353899747961" }] },
+      values: {
+        phone_numbers: [{ phone_number: "+353899747961" }],
+        email_addresses: [{ email_address: "someone-else@example.com" }],
+      },
     };
     const fetchImpl = vi.fn(async (input: RequestInfo | URL) => {
       const url = String(input);

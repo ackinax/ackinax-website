@@ -45,11 +45,15 @@ export function parseContactChannels(body: Partial<ContactChannels>): Validation
   if (!email && !body.telegram?.trim() && !body.phone?.trim()) {
     return { error: "Provide at least one contact method", status: 400 };
   }
+  // Reject rather than truncate: truncating after validation would store a
+  // different string than the one EMAIL_RE approved, and that stored value
+  // is also the Attio identity match key - it must be exact, not mangled.
+  if (email && email.length > FIELD_LIMITS.email) return { error: "Email must be under 255 characters", status: 400 };
   if (email && !EMAIL_RE.test(email)) return { error: "Invalid email", status: 400 };
 
   return {
     name: trimTruncate(body.name, FIELD_LIMITS.name),
-    email: email ? email.slice(0, FIELD_LIMITS.email) : undefined,
+    email,
     telegram: trimTruncate(body.telegram, FIELD_LIMITS.telegram),
     phone: trimTruncate(body.phone, FIELD_LIMITS.phone),
     message: body.message.trim().slice(0, FIELD_LIMITS.message),

@@ -14,7 +14,10 @@
  * process, so the key must be passed via the environment directly.
  *
  * Idempotent by design: every create call treats a 409 conflict as
- * success, so re-running after a partial failure is safe.
+ * success, so re-running after a partial failure is safe. The stage-ladder
+ * reshape is the one exception - archiving an unrecognized status is
+ * destructive, so it only happens with ATTIO_SETUP_ARCHIVE_UNKNOWN=1 set;
+ * without it, a re-run logs what it would archive and leaves it alone.
  */
 
 import { STAGE_LADDER, SUB_TYPE_OPTIONS, LEAD_SOURCE_OPTIONS, type Stage } from "../worker/attio/schema";
@@ -185,10 +188,17 @@ async function probeUniqueAttributeSupport(object: "people" | "deals"): Promise<
   return isConflict(res);
 }
 
+// Archiving an unrecognized status is destructive to whatever it represented,
+// so it is opt-in - a re-run must not silently destroy a stage a human added
+// by hand between runs. This is what keeps the "safe to re-run" claim below
+// honest for the create calls without also making it true of this reshape.
+const ARCHIVE_UNKNOWN_ENV = "ATTIO_SETUP_ARCHIVE_UNKNOWN";
+
 async function reshapeStageLadder(): Promise<void> {
   console.log("Reshaping Deal stage ladder...");
   const existing = await listStatuses("deals", "stage");
   const claimed = new Set<Stage>();
+  const archiveUnknown = Boolean(process.env[ARCHIVE_UNKNOWN_ENV]);
 
   for (const status of existing) {
     if (status.is_archived) continue;
@@ -203,8 +213,12 @@ async function reshapeStageLadder(): Promise<void> {
     if (target && !claimed.has(target)) {
       await renameStatus("deals", "stage", status.id.status_id, target);
       claimed.add(target);
-    } else {
+    } else if (archiveUnknown) {
       await archiveStatus("deals", "stage", status.id.status_id, status.title);
+    } else {
+      console.log(
+        `  would archive unrecognized status "${status.title}" - re-run with ${ARCHIVE_UNKNOWN_ENV}=1 to apply, in case a human added it on purpose`,
+      );
     }
   }
 

@@ -7,7 +7,7 @@
  */
 
 import { describeFailure, retryOnce, type AttioClient } from "./client";
-import { FIRST_STAGE, isOpenStage, subTypeForTier, DEAL_OWNER_EMAIL, type LeadSource } from "./schema";
+import { FIRST_STAGE, STAGE_LADDER, isOpenStage, subTypeForTier, DEAL_OWNER_EMAIL, type LeadSource } from "./schema";
 import { MATCH_KEY_KINDS, type NormalizedIdentity } from "../identity";
 
 interface AttioDealRecord {
@@ -57,7 +57,14 @@ async function queryDealsForPersonOnce(client: AttioClient, personRecordId: stri
 }
 
 function findOpenDeal(records: AttioDealRecord[]): AttioDealRecord | undefined {
-  return records.find((record) => isOpenStage(extractStageTitle(record) ?? ""));
+  return records.find((record) => {
+    const title = extractStageTitle(record);
+    // An unrecognized or missing stage title must not default to "open" -
+    // that would silently reuse a Deal whose real stage we couldn't read,
+    // which could be Won or Lost. Fail closed: treat it as no match, so a
+    // new Deal is created instead (visible and recoverable).
+    return title !== undefined && (STAGE_LADDER as readonly string[]).includes(title) && isOpenStage(title);
+  });
 }
 
 function buildDealName(input: DealInput): string {
