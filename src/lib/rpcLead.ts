@@ -1,18 +1,11 @@
 import { z } from "zod";
 import { EMAIL_RE, FIELD_LIMITS } from "@/lib/leadFields";
+import { TIER_OPTIONS } from "@/lib/tiers";
 
-export { EMAIL_RE, FIELD_LIMITS };
+export { EMAIL_RE, FIELD_LIMITS, TIER_OPTIONS };
 
 /** Email we fall back to when the lead function isn't reachable. */
 export const FALLBACK_EMAIL = "talk@ackinax.com";
-
-export const TIER_OPTIONS = [
-  "Starter · shared endpoint",
-  "Commercial · dedicated endpoint",
-  "Dedicated / Managed · fully managed",
-  "Managed Block Manager hosting",
-  "Not sure yet",
-] as const;
 
 export const rpcLeadSchema = z
   .object({
