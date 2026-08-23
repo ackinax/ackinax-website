@@ -29,6 +29,14 @@ export interface PersonOutcome {
   action: "created" | "patched";
   /** KTD3: set when a human should sanity-check this resolution. */
   possibleDuplicate: boolean;
+  /**
+   * Identifiers this submission carried that the matched record did not
+   * already have - only meaningful when action is "patched" (RK6: an
+   * unexpected enrichment of an established contact should be visible).
+   * Always empty for a "created" outcome - there is no pre-existing
+   * record to enrich.
+   */
+  newlyAddedIdentifiers: MatchKeyKind[];
 }
 
 export type PersonResult = { ok: true; person: PersonOutcome } | { ok: false; error: string };
@@ -102,7 +110,10 @@ async function createPerson(client: AttioClient, input: PersonInput, possibleDup
   const values = buildValues(input.name, input.identity);
   const result = await client.post<{ id: { record_id: string } }>("/v2/objects/people/records", { data: { values } });
   if (!result.ok) return { ok: false, error: describeFailure(result) };
-  return { ok: true, person: { recordId: result.data.id.record_id, action: "created", possibleDuplicate } };
+  return {
+    ok: true,
+    person: { recordId: result.data.id.record_id, action: "created", possibleDuplicate, newlyAddedIdentifiers: [] },
+  };
 }
 
 async function patchPerson(
@@ -110,6 +121,7 @@ async function patchPerson(
   recordId: string,
   input: PersonInput,
   restrictTo: Set<MatchKeyKind> | undefined,
+  alreadyMatched: Set<MatchKeyKind>,
   possibleDuplicate: boolean,
 ): Promise<PersonResult> {
   const values = buildValues(input.name, input.identity, restrictTo);
@@ -117,7 +129,13 @@ async function patchPerson(
     data: { values },
   });
   if (!result.ok) return { ok: false, error: describeFailure(result) };
-  return { ok: true, person: { recordId, action: "patched", possibleDuplicate } };
+
+  const written = IDENTIFIER_KINDS.filter(
+    (kind) => input.identity[kind] !== undefined && (!restrictTo || restrictTo.has(kind)),
+  );
+  const newlyAddedIdentifiers = written.filter((kind) => !alreadyMatched.has(kind));
+
+  return { ok: true, person: { recordId, action: "patched", possibleDuplicate, newlyAddedIdentifiers } };
 }
 
 export async function resolvePerson(client: AttioClient, input: PersonInput): Promise<PersonResult> {
@@ -142,7 +160,7 @@ export async function resolvePerson(client: AttioClient, input: PersonInput): Pr
       return createPerson(client, input, true);
     }
 
-    return patchPerson(client, record.id.record_id, input, undefined, false);
+    return patchPerson(client, record.id.record_id, input, undefined, matched, false);
   }
 
   // Multiple matches: select by KTD2 precedence, and never write an
@@ -163,5 +181,5 @@ export async function resolvePerson(client: AttioClient, input: PersonInput): Pr
     IDENTIFIER_KINDS.filter((kind) => input.identity[kind] !== undefined && !claimedByOthers.has(kind)),
   );
 
-  return patchPerson(client, selected.record.id.record_id, input, restrictTo, true);
+  return patchPerson(client, selected.record.id.record_id, input, restrictTo, selected.matched, true);
 }

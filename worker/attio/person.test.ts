@@ -74,7 +74,11 @@ describe("resolvePerson", () => {
     const result = await resolvePerson(client, { identity });
 
     expect(result.ok).toBe(true);
-    if (result.ok) expect(result.person.action).toBe("patched");
+    if (result.ok) {
+      expect(result.person.action).toBe("patched");
+      // The record already had this email - nothing genuinely new here.
+      expect(result.person.newlyAddedIdentifiers).toEqual([]);
+    }
 
     const [, body] = client.patch.mock.calls[0] as [string, { data: { values: Record<string, unknown> } }];
     expect(body.data.values.email_addresses).toEqual(["frank+rpc@example.com"]);
@@ -167,6 +171,8 @@ describe("resolvePerson", () => {
       expect(result.person.recordId).toBe("email-owner");
       expect(result.person.action).toBe("patched");
       expect(result.person.possibleDuplicate).toBe(true);
+      // The email was already on the selected record - not a new identifier.
+      expect(result.person.newlyAddedIdentifiers).toEqual([]);
     }
     expect(client.patch).toHaveBeenCalledTimes(1);
 
@@ -205,6 +211,38 @@ describe("resolvePerson", () => {
 
     expect(result.ok).toBe(true);
     expect(queryCalls).toBe(2);
+  });
+
+  it("reports a genuinely new identifier added to a pre-existing Person (RK6)", async () => {
+    // The record is only known by email so far; this submission also supplies
+    // a Telegram handle that record has never seen before.
+    const existing = record("existing-person", { email: "frank@example.com" });
+    const client = fakeClient();
+    client.post.mockResolvedValue(ok([existing]));
+    client.patch.mockResolvedValue(ok({ id: { record_id: "existing-person" } }));
+
+    const identity: NormalizedIdentity = { email: "frank@example.com", telegram: "msiimsii" };
+    const result = await resolvePerson(client, { identity });
+
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.person.action).toBe("patched");
+      expect(result.person.newlyAddedIdentifiers).toEqual(["telegram"]);
+    }
+  });
+
+  it("a created Person always reports no newly-added identifiers - there is no pre-existing record to enrich", async () => {
+    const client = fakeClient();
+    client.post.mockImplementation(async (path: string) => {
+      if (path.endsWith("/query")) return ok([]);
+      return ok({ id: { record_id: "new-person" } });
+    });
+
+    const identity: NormalizedIdentity = { email: "a@b.com", telegram: "msiimsii" };
+    const result = await resolvePerson(client, { identity });
+
+    expect(result.ok).toBe(true);
+    if (result.ok) expect(result.person.newlyAddedIdentifiers).toEqual([]);
   });
 
   it("never includes IP or user-agent fields in a request body", async () => {
