@@ -7,7 +7,7 @@ export default function PrivacyPolicy() {
       <Navbar />
       <main className="max-w-[800px] mx-auto px-6 md:px-10 pt-28 pb-20">
         <h1 className="font-mono-brand text-2xl md:text-3xl font-bold mb-2">ACKINAX – PRIVACY NOTICE</h1>
-        <p className="text-dim text-sm mb-10">Date: 27 May 2025</p>
+        <p className="text-dim text-sm mb-10">Date: 23 August 2026</p>
 
         <div className="space-y-8 text-muted-foreground text-[15px] leading-relaxed font-body">
 
@@ -58,7 +58,7 @@ export default function PrivacyPolicy() {
             <h3 className="font-mono-brand text-base text-foreground mb-2 mt-4">6.2 Contacting Us</h3>
             <p>If you email or otherwise contact us we collect:</p>
             <ul className="list-disc pl-6 mt-2 space-y-1">
-              <li>Your name, email address and any other information you choose to provide.</li>
+              <li>Your name, email address, Telegram handle, phone number and any other information you choose to provide.</li>
             </ul>
 
             <h3 className="font-mono-brand text-base text-foreground mb-2 mt-4">6.3 Account Registration &amp; Wallet Data</h3>
@@ -118,15 +118,16 @@ export default function PrivacyPolicy() {
             <ul className="list-disc pl-6 mt-2 space-y-1">
               <li>Third-Party Payment Provider – to process crypto payments;</li>
               <li>Sub-contracted Node-operators – strictly as needed to perform Delegation Services;</li>
-              <li>IT and hosting providers in Switzerland and the EEA;</li>
+              <li>CRM and customer-relationship management providers – to record and follow up on enquiries and leads;</li>
+              <li>IT and hosting providers;</li>
               <li>Regulators or law-enforcement where required by law.</li>
             </ul>
-            <p className="mt-3">Whenever data leaves Switzerland/EEA we ensure appropriate safeguards (e.g., Standard Contractual Clauses).</p>
+            <p className="mt-3">Whenever data leaves Switzerland/EEA – including to a service provider based elsewhere – we ensure appropriate safeguards (e.g., Standard Contractual Clauses).</p>
           </section>
 
           <section>
             <h2 className="font-mono-brand text-lg text-foreground mb-3">10. DATA RETENTION</h2>
-            <p>We keep personal data only as long as necessary for the purposes described or to meet legal obligations (typically 5 years for contractual records, 12 months for server logs, unless a longer period is mandated).</p>
+            <p>We keep personal data only as long as necessary for the purposes described or to meet legal obligations (typically 5 years for contractual records, 24 months for an enquiry or lead that does not lead to a contract, and 12 months for server logs, unless a longer period is mandated).</p>
           </section>
 
           <section>
