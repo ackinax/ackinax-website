@@ -115,7 +115,7 @@ export default function RpcLeadForm({ defaultTier = "", id }: { defaultTier?: st
           </LeadField>
         </div>
         <div className="grid sm:grid-cols-2 gap-5">
-          <LeadField label="Phone" error={errors.phone}>
+          <LeadField label="Phone" error={errors.phone} hint="Include your country code, e.g. +41 79 123 45 67">
             <Input type="tel" value={form.phone} onChange={(e) => update("phone", e.target.value)} placeholder="+1 555 000 0000" maxLength={32} />
           </LeadField>
           <LeadField label="Name" error={errors.name}>
@@ -132,12 +132,26 @@ export default function RpcLeadForm({ defaultTier = "", id }: { defaultTier?: st
   );
 }
 
-function LeadField({ label, error, children }: { label: string; error?: string; children: React.ReactNode }) {
+function LeadField({
+  label,
+  error,
+  hint,
+  children,
+}: {
+  label: string;
+  error?: string;
+  hint?: string;
+  children: React.ReactNode;
+}) {
   return (
     <div className="space-y-1.5">
       <Label className="font-body text-sm text-foreground">{label}</Label>
       {children}
-      {error && <p className="text-destructive text-xs font-body">{error}</p>}
+      {error ? (
+        <p className="text-destructive text-xs font-body">{error}</p>
+      ) : (
+        hint && <p className="text-muted-foreground text-xs font-body">{hint}</p>
+      )}
     </div>
   );
 }

@@ -142,7 +142,7 @@ export default function Contact() {
                 </Field>
               </div>
               <div className="grid sm:grid-cols-2 gap-5">
-                <Field label="Phone" error={errors.phone}>
+                <Field label="Phone" error={errors.phone} hint="Include your country code, e.g. +41 79 123 45 67">
                   <Input
                     type="tel"
                     value={form.phone}
@@ -175,12 +175,26 @@ export default function Contact() {
   );
 }
 
-function Field({ label, error, children }: { label: string; error?: string; children: React.ReactNode }) {
+function Field({
+  label,
+  error,
+  hint,
+  children,
+}: {
+  label: string;
+  error?: string;
+  hint?: string;
+  children: React.ReactNode;
+}) {
   return (
     <div className="space-y-1.5">
       <Label className="font-body text-sm text-foreground">{label}</Label>
       {children}
-      {error && <p className="text-destructive text-xs font-body">{error}</p>}
+      {error ? (
+        <p className="text-destructive text-xs font-body">{error}</p>
+      ) : (
+        hint && <p className="text-muted-foreground text-xs font-body">{hint}</p>
+      )}
     </div>
   );
 }
