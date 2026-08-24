@@ -51,12 +51,7 @@ export type LeadSource = (typeof LEAD_SOURCE_OPTIONS)[number];
 /**
  * Deal-owner workspace-member reference (A3), resolved by running
  * scripts/attio-setup.ts against the live workspace and recorded in
- * Docs/runbooks/attio-workspace-setup.md.
- *
- * No Attio credentials were available in the session that wrote this
- * code, so this is a placeholder rather than the real resolved value.
- * worker/attio/sync.ts (U7) treats an empty value the same as an unset
- * API key: it skips the sync silently-but-visibly rather than sending a
- * Deal create that Attio would reject (owner is a required attribute).
+ * Docs/runbooks/attio-workspace-setup.md. The AckiNax workspace has a
+ * single member, confirming A3's single-owner assumption.
  */
-export const DEAL_OWNER_EMAIL = "";
+export const DEAL_OWNER_EMAIL = "frank@syks.co";

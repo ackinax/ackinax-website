@@ -269,7 +269,7 @@ describe("resolvePerson", () => {
     await resolvePerson(client, { name: "Ada Lovelace", identity });
 
     const [, body] = client.patch.mock.calls[0] as [string, { data: { values: Record<string, unknown> } }];
-    expect(body.data.values.name).toEqual({ full_name: "Ada Lovelace" });
+    expect(body.data.values.name).toEqual([{ first_name: "Ada", last_name: "Lovelace", full_name: "Ada Lovelace" }]);
   });
 
   it("always sets the name on create", async () => {
@@ -283,7 +283,21 @@ describe("resolvePerson", () => {
 
     const createCall = client.post.mock.calls.find(([path]) => !path.endsWith("/query"));
     const body = createCall![1] as { data: { values: Record<string, unknown> } };
-    expect(body.data.values.name).toEqual({ full_name: "Ada Lovelace" });
+    expect(body.data.values.name).toEqual([{ first_name: "Ada", last_name: "Lovelace", full_name: "Ada Lovelace" }]);
+  });
+
+  it("splits a single-word name into first_name with an empty last_name (Attio requires both)", async () => {
+    const client = fakeClient();
+    client.post.mockImplementation(async (path: string) => {
+      if (path.endsWith("/query")) return ok([]);
+      return ok({ id: { record_id: "new-person" } });
+    });
+
+    await resolvePerson(client, { name: "Cher", identity: { email: "cher@example.com" } });
+
+    const createCall = client.post.mock.calls.find(([path]) => !path.endsWith("/query"));
+    const body = createCall![1] as { data: { values: Record<string, unknown> } };
+    expect(body.data.values.name).toEqual([{ first_name: "Cher", last_name: "", full_name: "Cher" }]);
   });
 
   it("does not replace a stored Telegram handle with a different one on patch (R4)", async () => {

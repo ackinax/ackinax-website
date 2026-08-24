@@ -55,10 +55,7 @@ describe("subTypeForTier", () => {
 });
 
 describe("DEAL_OWNER_EMAIL", () => {
-  it("is a placeholder until scripts/attio-setup.ts has run against the live workspace", () => {
-    // Documents the current state rather than asserting a specific value -
-    // this test should start failing the moment someone fills it in, as a
-    // reminder to also update this test.
-    expect(DEAL_OWNER_EMAIL).toBe("");
+  it("is resolved to the AckiNax workspace's sole member, per scripts/attio-setup.ts", () => {
+    expect(DEAL_OWNER_EMAIL).toBe("frank@syks.co");
   });
 });

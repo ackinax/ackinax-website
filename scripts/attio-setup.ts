@@ -164,17 +164,19 @@ async function reportCurrentSchema(): Promise<void> {
  * still exists (archived), so a conflict also counts as "yes, supported".
  */
 async function probeUniqueAttributeSupport(object: "people" | "deals"): Promise<boolean> {
-  const probeSlug = "_probe_unique_attio_setup";
+  const probeSlug = "probe_unique_attio_setup";
   const res = await attio(`/v2/objects/${object}/attributes`, {
     method: "POST",
     body: JSON.stringify({
       data: {
         title: "Attio Setup Probe (safe to archive/ignore)",
+        description: null,
         api_slug: probeSlug,
         type: "text",
         is_unique: true,
         is_required: false,
         is_multiselect: false,
+        config: {},
       },
     }),
   });
@@ -185,7 +187,9 @@ async function probeUniqueAttributeSupport(object: "people" | "deals"): Promise<
     });
     return true;
   }
-  return isConflict(res);
+  if (isConflict(res)) return true;
+  console.log(`  probe request failed unexpectedly (treating as "not supported"): ${res.status} ${JSON.stringify(res.body)}`);
+  return false;
 }
 
 // Archiving an unrecognized status is destructive to whatever it represented,
@@ -234,11 +238,13 @@ async function ensureSubTypeAndSourceSelects(): Promise<void> {
 
   await ensureAttribute("deals", {
     title: "Ackinax Sub-Type",
+    description: null,
     api_slug: "ackinax_sub_type",
     type: "select",
     is_required: false,
     is_unique: false,
     is_multiselect: false,
+    config: {},
   });
   for (const tier of SUB_TYPE_OPTIONS) {
     await ensureSelectOption("deals", "ackinax_sub_type", tier);
@@ -246,11 +252,13 @@ async function ensureSubTypeAndSourceSelects(): Promise<void> {
 
   await ensureAttribute("deals", {
     title: "Lead Source",
+    description: null,
     api_slug: "lead_source",
     type: "select",
     is_required: false,
     is_unique: false,
     is_multiselect: false,
+    config: {},
   });
   for (const source of LEAD_SOURCE_OPTIONS) {
     await ensureSelectOption("deals", "lead_source", source);
@@ -262,11 +270,13 @@ async function ensureTelegramAttribute(): Promise<void> {
   // Non-unique: RK1 - People cannot carry a unique custom attribute.
   await ensureAttribute("people", {
     title: "Telegram",
+    description: null,
     api_slug: "telegram",
     type: "text",
     is_required: false,
     is_unique: false,
     is_multiselect: false,
+    config: {},
   });
 }
 

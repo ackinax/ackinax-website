@@ -102,6 +102,18 @@ function precedenceRank(matched: Set<MatchKeyKind>): number {
 }
 
 /**
+ * Attio's personal-name attribute requires first_name and last_name
+ * alongside full_name (empirically confirmed - not documented in the
+ * OpenAPI schema surfaced to WebFetch). The form only collects one
+ * free-text name field, so a mononym or single word puts everything in
+ * first_name with an empty last_name, which Attio accepts.
+ */
+function splitName(name: string): { first_name: string; last_name: string; full_name: string } {
+  const [first, ...rest] = name.trim().split(/\s+/);
+  return { first_name: first, last_name: rest.join(" "), full_name: name };
+}
+
+/**
  * `existing` is only present when patching a matched record. name and
  * telegram are single-value Attio attributes - a PATCH *replaces* them
  * rather than appending, unlike the multiselect email/phone arrays - so
@@ -118,7 +130,7 @@ function buildValues(
   const values: Record<string, unknown> = {};
   const include = (kind: MatchKeyKind) => !restrictTo || restrictTo.has(kind);
 
-  if (name && !existing?.name) values.name = { full_name: name };
+  if (name && !existing?.name) values.name = [splitName(name)];
   if (identity.email && include("email")) values.email_addresses = [identity.email];
   if (identity.telegram && include("telegram") && (!existing?.telegram || existing.telegram === identity.telegram)) {
     values.telegram = identity.telegram;
