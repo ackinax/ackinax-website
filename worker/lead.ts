@@ -5,7 +5,19 @@
  * Worker stays dependency-free rather than importing Zod.
  */
 
-import { EMAIL_RE, FIELD_LIMITS } from "../src/lib/leadFields";
+import { EMAIL_RE, FIELD_LIMITS, HONEYPOT_FIELD } from "../src/lib/leadFields";
+
+/**
+ * True when the hidden honeypot field came back with content, which a human
+ * filling the visible form cannot do. Checked against the raw body rather
+ * than a parsed lead: the field is deliberately not part of the lead shape,
+ * so it can never reach Slack, Attio or a typed attribute.
+ */
+export function isHoneypotTripped(body: unknown): boolean {
+  if (typeof body !== "object" || body === null) return false;
+  const value = (body as Record<string, unknown>)[HONEYPOT_FIELD];
+  return typeof value === "string" && value.trim().length > 0;
+}
 
 export interface ContactChannels {
   name?: string;

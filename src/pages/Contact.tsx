@@ -7,7 +7,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
 import FormField from "@/components/FormField";
-import { EMAIL_RE, FIELD_LIMITS } from "@/lib/leadFields";
+import HoneypotField from "@/components/HoneypotField";
+import { EMAIL_RE, FIELD_LIMITS, HONEYPOT_FIELD } from "@/lib/leadFields";
 
 const contactSchema = z
   .object({
@@ -41,6 +42,8 @@ export default function Contact() {
   const [loading, setLoading] = useState(false);
   const [form, setForm] = useState<ContactForm>({ name: "", email: "", telegram: "", phone: "", message: "" });
   const [errors, setErrors] = useState<Partial<Record<keyof ContactForm, string>>>({});
+  // Kept out of `form` so the honeypot can never leak into the typed lead shape.
+  const [honeypot, setHoneypot] = useState("");
 
   const handleChange = (field: keyof ContactForm, value: string) => {
     setForm((prev) => ({ ...prev, [field]: value }));
@@ -64,7 +67,7 @@ export default function Contact() {
       const res = await fetch("/api/contact", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(result.data),
+        body: JSON.stringify({ ...result.data, [HONEYPOT_FIELD]: honeypot }),
       });
       const data = (await res.json().catch(() => null)) as { success?: boolean } | null;
       if (!res.ok || !data?.success) throw new Error("Request failed");
@@ -110,6 +113,8 @@ export default function Contact() {
           </p>
 
           <form onSubmit={handleSubmit} className="space-y-5">
+            <HoneypotField value={honeypot} onChange={setHoneypot} />
+
             <FormField label="Message" error={errors.message}>
               <Textarea
                 value={form.message}

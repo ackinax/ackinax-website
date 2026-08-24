@@ -10,9 +10,21 @@
  * server-side (Worker secret); when unset the routes return 503 so forms fall
  * back to email. Routing is configured in wrangler.jsonc via
  * `run_worker_first: ["/api/*"]`, so asset and SPA routes never hit this script.
+ *
+ * Both routes also carry a honeypot (src/components/HoneypotField.tsx): a
+ * tripped one still posts to Slack and still answers success, but never
+ * reaches Attio. Slack is transient and easy to ignore; an Attio record is
+ * permanent and its planted identifiers cannot be told apart from real ones.
  */
 
-import { parseRpcLead, parseContactChannels, isValidationError, type RpcLead, type ContactMessage } from "./lead";
+import {
+  parseRpcLead,
+  parseContactChannels,
+  isValidationError,
+  isHoneypotTripped,
+  type RpcLead,
+  type ContactMessage,
+} from "./lead";
 import { evaluateSyncGate, runSync, type RawLeadFields, type SyncGateResult } from "./attio/sync";
 import { DEAL_OWNER_EMAIL, type LeadSource } from "./attio/schema";
 import { RATE_WINDOW_MS } from "./constants";
@@ -156,7 +168,7 @@ async function handleRpcLead(request: Request, env: Env, ctx: ExecutionContext):
   const lead = parseRpcLead(body);
   if (isValidationError(lead)) return json({ error: lead.error }, lead.status);
 
-  const gate = evaluateSyncGate(env.ATTIO_API_KEY, DEAL_OWNER_EMAIL, lead);
+  const gate = evaluateSyncGate(env.ATTIO_API_KEY, DEAL_OWNER_EMAIL, lead, isHoneypotTripped(body));
   const ok = await postToSlack(env.SLACK_WEBHOOK_URL!, buildRpcLeadMessage(lead, gate.statusMarker));
   scheduleSync(env, ctx, lead, "RPC endpoint", gate, ok);
 
@@ -177,7 +189,7 @@ async function handleContact(request: Request, env: Env, ctx: ExecutionContext):
   const contact = parseContactChannels(body);
   if (isValidationError(contact)) return json({ error: contact.error }, contact.status);
 
-  const gate = evaluateSyncGate(env.ATTIO_API_KEY, DEAL_OWNER_EMAIL, contact);
+  const gate = evaluateSyncGate(env.ATTIO_API_KEY, DEAL_OWNER_EMAIL, contact, isHoneypotTripped(body));
   const ok = await postToSlack(env.SLACK_WEBHOOK_URL!, buildContactMessage(contact, gate.statusMarker));
   scheduleSync(env, ctx, contact, "Contact form", gate, ok);
 

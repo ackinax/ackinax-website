@@ -6,6 +6,15 @@
 
 export const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+/**
+ * Name of the honeypot field: hidden in both forms, so only an automated
+ * submitter fills it. Deliberately named for something a naive bot is happy
+ * to fill but no browser autofill or password manager has a concept of -
+ * a field named `email`, `url` or `phone` risks being filled for a real
+ * person, and a false positive here costs a real lead.
+ */
+export const HONEYPOT_FIELD = "subject";
+
 export const FIELD_LIMITS = {
   name: 100,
   email: 255,

@@ -9,6 +9,7 @@ vi.mock("./attio/schema", async (importOriginal) => {
 
 import worker from "./index";
 import { __resetFailureThrottleForTests } from "./attio/sync";
+import { HONEYPOT_FIELD } from "../src/lib/leadFields";
 
 interface FakeCtx extends ExecutionContext {
   waitUntilPromises: Promise<unknown>[];
@@ -248,5 +249,77 @@ describe("existing behavior, unchanged by the Attio sync", () => {
     const req = new Request("https://example.com/some/page");
     await worker.fetch(req, env, fakeCtx());
     expect(env.ASSETS.fetch).toHaveBeenCalledWith(req);
+  });
+});
+
+describe("honeypot", () => {
+  it("a tripped honeypot still reaches Slack but never writes to Attio", async () => {
+    const ctx = fakeCtx();
+
+    const res = await worker.fetch(
+      rpcLeadRequest(
+        { email: "bot@example.com", message: "buy cheap things", [HONEYPOT_FIELD]: "http://spam.example" },
+        "203.0.113.90",
+      ),
+      fakeEnv(),
+      ctx,
+    );
+
+    // Success, so a bot gets no signal that it was caught - and a false
+    // positive from an aggressive password manager still reaches a human.
+    expect(res.status).toBe(200);
+    expect(await res.json()).toEqual({ success: true });
+
+    // The lead is still visible in Slack, marked so it can be triaged...
+    expect(slackCalls).toHaveLength(1);
+    expect(slackCalls[0].blocks.at(-1)?.elements?.[0].text).toContain("CRM: skipped - honeypot");
+
+    // ...but nothing was scheduled against Attio, where records are permanent.
+    expect(ctx.waitUntilPromises).toHaveLength(0);
+  });
+
+  it("applies to the contact form too", async () => {
+    const ctx = fakeCtx();
+
+    const res = await worker.fetch(
+      contactRequest(
+        { email: "bot@example.com", message: "spam", [HONEYPOT_FIELD]: "anything" },
+        "203.0.113.91",
+      ),
+      fakeEnv(),
+      ctx,
+    );
+
+    expect(res.status).toBe(200);
+    expect(ctx.waitUntilPromises).toHaveLength(0);
+  });
+
+  it("an empty honeypot - what the real forms always send - syncs normally", async () => {
+    const ctx = fakeCtx();
+
+    const res = await worker.fetch(
+      rpcLeadRequest({ email: "real@example.com", message: "hello", [HONEYPOT_FIELD]: "" }, "203.0.113.92"),
+      fakeEnv(),
+      ctx,
+    );
+
+    expect(res.status).toBe(200);
+    expect(ctx.waitUntilPromises).toHaveLength(1);
+    await Promise.all(ctx.waitUntilPromises);
+  });
+
+  it("never forwards the honeypot value into the Slack message or a typed field", async () => {
+    const ctx = fakeCtx();
+
+    await worker.fetch(
+      rpcLeadRequest(
+        { email: "bot@example.com", message: "hello", [HONEYPOT_FIELD]: "UNIQUE-HONEYPOT-CANARY" },
+        "203.0.113.93",
+      ),
+      fakeEnv(),
+      ctx,
+    );
+
+    expect(JSON.stringify(slackCalls)).not.toContain("UNIQUE-HONEYPOT-CANARY");
   });
 });

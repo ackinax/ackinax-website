@@ -5,6 +5,8 @@ import { useToast } from "@/hooks/use-toast";
 import { FALLBACK_EMAIL, TIER_OPTIONS, rpcLeadSchema, type RpcLead } from "@/lib/rpcLead";
 import { Loader2 } from "lucide-react";
 import FormField from "@/components/FormField";
+import HoneypotField from "@/components/HoneypotField";
+import { HONEYPOT_FIELD } from "@/lib/leadFields";
 
 const EMPTY: RpcLead = { name: "", email: "", telegram: "", phone: "", project: "", tier: "", volume: "", message: "" };
 
@@ -14,6 +16,8 @@ export default function RpcLeadForm({ defaultTier = "", id }: { defaultTier?: st
   const [form, setForm] = useState<RpcLead>({ ...EMPTY, tier: defaultTier });
   const [errors, setErrors] = useState<Partial<Record<keyof RpcLead, string>>>({});
   const [sent, setSent] = useState(false);
+  // Kept out of `form` so the honeypot can never leak into the typed lead shape.
+  const [honeypot, setHoneypot] = useState("");
 
   const update = (field: keyof RpcLead, value: string) => {
     setForm((prev) => ({ ...prev, [field]: value }));
@@ -37,7 +41,7 @@ export default function RpcLeadForm({ defaultTier = "", id }: { defaultTier?: st
       const res = await fetch("/api/rpc-lead", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(result.data),
+        body: JSON.stringify({ ...result.data, [HONEYPOT_FIELD]: honeypot }),
       });
       const data = (await res.json().catch(() => null)) as { success?: boolean } | null;
       if (!res.ok || !data?.success) throw new Error("Request failed");
@@ -69,6 +73,8 @@ export default function RpcLeadForm({ defaultTier = "", id }: { defaultTier?: st
 
   return (
     <form id={id} onSubmit={handleSubmit} className="card-base space-y-5">
+      <HoneypotField value={honeypot} onChange={setHoneypot} />
+
       <FormField label="Use case" error={errors.message}>
         <Textarea
           value={form.message}

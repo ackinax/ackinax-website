@@ -50,34 +50,43 @@ beforeEach(() => {
 
 describe("evaluateSyncGate", () => {
   it("skips with a status marker when the API key is unset", () => {
-    const gate = evaluateSyncGate(undefined, "owner@example.com", baseLead());
+    const gate = evaluateSyncGate(undefined, "owner@example.com", baseLead(), false);
     expect(gate.shouldSync).toBe(false);
     expect(gate.statusMarker).toBe("CRM: skipped - no key");
   });
 
   it("skips with a distinct status marker when the deal owner is unset (the shipped state)", () => {
-    const gate = evaluateSyncGate("secret-key", "", baseLead());
+    const gate = evaluateSyncGate("secret-key", "", baseLead(), false);
     expect(gate.shouldSync).toBe(false);
     expect(gate.statusMarker).toBe("CRM: skipped - no deal owner");
   });
 
   it("covers AE4: skips with a status marker when the lead has no normalizable identifier", () => {
-    const gate = evaluateSyncGate("secret-key", "owner@example.com", {
-      phone: "07777 777777",
-      message: "hi",
-    });
+    const gate = evaluateSyncGate(
+      "secret-key",
+      "owner@example.com",
+      { phone: "07777 777777", message: "hi" },
+      false,
+    );
     expect(gate.shouldSync).toBe(false);
     expect(gate.statusMarker).toBe("CRM: skipped - no match key");
   });
 
   it("proceeds when a key is present and the lead has a match key", () => {
-    const gate = evaluateSyncGate(
-      "secret-key",
-      "owner@example.com",
-      baseLead(),
-    );
+    const gate = evaluateSyncGate("secret-key", "owner@example.com", baseLead(), false);
     expect(gate.shouldSync).toBe(true);
     expect(gate.statusMarker).toBeUndefined();
+  });
+
+  it("skips with a honeypot marker when the hidden field was filled", () => {
+    const gate = evaluateSyncGate("secret-key", "owner@example.com", baseLead(), true);
+    expect(gate.shouldSync).toBe(false);
+    expect(gate.statusMarker).toBe("CRM: skipped - honeypot");
+  });
+
+  it("reports the honeypot ahead of a missing key, so the marker names the real reason", () => {
+    const gate = evaluateSyncGate(undefined, "", baseLead(), true);
+    expect(gate.statusMarker).toBe("CRM: skipped - honeypot");
   });
 });
 

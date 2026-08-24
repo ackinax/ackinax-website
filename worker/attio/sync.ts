@@ -37,9 +37,20 @@ export interface SyncGateResult {
  * of depending on module-level state that is empty until U3's live setup
  * has run.
  */
-export function evaluateSyncGate(apiKey: string | undefined, dealOwnerEmail: string, lead: RawLeadFields): SyncGateResult {
+export function evaluateSyncGate(
+  apiKey: string | undefined,
+  dealOwnerEmail: string,
+  lead: RawLeadFields,
+  honeypotTripped: boolean,
+): SyncGateResult {
   const identity = normalizeIdentity(lead);
 
+  // Checked before the key and owner gates so the marker names the real
+  // reason. Required rather than defaulted: this is a spam control, and a
+  // caller that forgets it should fail to compile, not silently fail open.
+  if (honeypotTripped) {
+    return { shouldSync: false, statusMarker: "CRM: skipped - honeypot", identity };
+  }
   if (!apiKey) {
     return { shouldSync: false, statusMarker: "CRM: skipped - no key", identity };
   }

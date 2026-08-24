@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
-import { parseContactChannels, parseRpcLead, isValidationError } from "./lead";
+import { parseContactChannels, parseRpcLead, isValidationError, isHoneypotTripped } from "./lead";
+import { HONEYPOT_FIELD } from "../src/lib/leadFields";
 
 describe("parseContactChannels", () => {
   it("accepts a minimal valid submission", () => {
@@ -95,5 +96,34 @@ describe("parseRpcLead", () => {
       expect(result.tier).toHaveLength(80);
       expect(result.volume).toHaveLength(120);
     }
+  });
+});
+
+describe("isHoneypotTripped", () => {
+  it("trips when the hidden field carries content", () => {
+    expect(isHoneypotTripped({ message: "hi", [HONEYPOT_FIELD]: "http://spam.example" })).toBe(true);
+  });
+
+  it("does not trip on a normal submission that omits the field entirely", () => {
+    expect(isHoneypotTripped({ email: "ada@example.com", message: "hello" })).toBe(false);
+  });
+
+  it("does not trip on an empty string, which is what the real forms always send", () => {
+    expect(isHoneypotTripped({ message: "hi", [HONEYPOT_FIELD]: "" })).toBe(false);
+  });
+
+  it("does not trip on whitespace alone", () => {
+    expect(isHoneypotTripped({ message: "hi", [HONEYPOT_FIELD]: "   " })).toBe(false);
+  });
+
+  it("does not trip on a non-string value, rather than coercing it", () => {
+    expect(isHoneypotTripped({ message: "hi", [HONEYPOT_FIELD]: 0 })).toBe(false);
+    expect(isHoneypotTripped({ message: "hi", [HONEYPOT_FIELD]: null })).toBe(false);
+  });
+
+  it("does not throw on a non-object body", () => {
+    expect(isHoneypotTripped(null)).toBe(false);
+    expect(isHoneypotTripped("not an object")).toBe(false);
+    expect(isHoneypotTripped(undefined)).toBe(false);
   });
 });
