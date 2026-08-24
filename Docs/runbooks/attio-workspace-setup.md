@@ -56,7 +56,9 @@ Worker secret until KD7's spam hardening ships (step 2 below).
      runtime key immediately if it is ever exposed (logs, a misconfigured
      error response, a compromised deploy credential) - `wrangler secret put`
      with the same name overwrites it in place.
-   - _Setup key issued:_ `<date>` · _Runtime key issued:_ `<date>`
+   - _Setup key issued:_ 2026-08-24 (rotated same day after exposure in an
+     AI assistant session - see below) · _Runtime key issued:_ 2026-08-24
+     (also rotated same day for the same reason)
 
 3. **Attio's Data Processing Addendum** is auto-incorporated by reference
    into the Attio Customer Agreement - no separate signature is required.
@@ -145,4 +147,7 @@ not a one-time setting:
    no interaction (email, calendar, note) in the last 24 months.
 2. Review the list; delete the Person and Deal for anything that is
    genuinely a dead, unconverted lead past the retention window.
-3. Cadence: quarterly. _Owner:_ `<name>`. _Last review:_ `<date>`.
+3. Cadence: quarterly. _Owner:_ Frank Sykes (sole AckiNax workspace member
+   as of this writing - reassign here if that changes). _Last review:_
+   2026-08-24 (workspace creation - nothing to review yet; next due
+   2026-11-24).
