@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
-import FormField from "@/components/FormField";
+import FormField, { RequiredMark } from "@/components/FormField";
 import HoneypotField from "@/components/HoneypotField";
 import { EMAIL_RE, FIELD_LIMITS, HONEYPOT_FIELD } from "@/lib/leadFields";
 
@@ -115,7 +115,7 @@ export default function Contact() {
           <form onSubmit={handleSubmit} className="space-y-5">
             <HoneypotField value={honeypot} onChange={setHoneypot} />
 
-            <FormField label="Message" error={errors.message}>
+            <FormField label="Message" error={errors.message} required>
               <Textarea
                 value={form.message}
                 onChange={(e) => handleChange("message", e.target.value)}
@@ -127,7 +127,10 @@ export default function Contact() {
 
             <div className="space-y-5 pt-5 border-t border-border">
               <div>
-                <p className="font-mono-brand text-xs uppercase tracking-[0.1em] text-muted-foreground">How can we reach you?</p>
+                <p className="font-mono-brand text-xs uppercase tracking-[0.1em] text-muted-foreground">
+                  How can we reach you?
+                  <RequiredMark />
+                </p>
                 <p className="font-body text-xs text-muted-foreground mt-1">Add at least one: email, Telegram or phone.</p>
               </div>
               <div className="grid sm:grid-cols-2 gap-5">

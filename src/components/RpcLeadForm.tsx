@@ -4,7 +4,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { FALLBACK_EMAIL, TIER_OPTIONS, rpcLeadSchema, type RpcLead } from "@/lib/rpcLead";
 import { Loader2 } from "lucide-react";
-import FormField from "@/components/FormField";
+import FormField, { RequiredMark } from "@/components/FormField";
 import HoneypotField from "@/components/HoneypotField";
 import { HONEYPOT_FIELD } from "@/lib/leadFields";
 
@@ -75,7 +75,7 @@ export default function RpcLeadForm({ defaultTier = "", id }: { defaultTier?: st
     <form id={id} onSubmit={handleSubmit} className="card-base space-y-5">
       <HoneypotField value={honeypot} onChange={setHoneypot} />
 
-      <FormField label="Use case" error={errors.message}>
+      <FormField label="Use case" error={errors.message} required>
         <Textarea
           value={form.message}
           onChange={(e) => update("message", e.target.value)}
@@ -109,7 +109,10 @@ export default function RpcLeadForm({ defaultTier = "", id }: { defaultTier?: st
 
       <div className="space-y-5 pt-5 border-t border-border">
         <div>
-          <p className="font-mono-brand text-xs uppercase tracking-[0.1em] text-muted-foreground">How can we reach you?</p>
+          <p className="font-mono-brand text-xs uppercase tracking-[0.1em] text-muted-foreground">
+            How can we reach you?
+            <RequiredMark />
+          </p>
           <p className="font-body text-xs text-muted-foreground mt-1">Add at least one: email, Telegram or phone.</p>
         </div>
         <div className="grid sm:grid-cols-2 gap-5">
