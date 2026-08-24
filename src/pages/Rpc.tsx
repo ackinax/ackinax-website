@@ -62,7 +62,7 @@ const tiers = [
   {
     name: "Starter",
     tag: "Shared endpoint",
-    price: "from $250",
+    price: "from €250",
     cadence: "/mo",
     blurb: "Devs, bots and mini-apps that need reliable access without running a node.",
     features: [
@@ -78,7 +78,7 @@ const tiers = [
   {
     name: "Commercial",
     tag: "Dedicated endpoint",
-    price: "from $1,500",
+    price: "from €1,500",
     cadence: "/mo",
     blurb: "Production apps, market makers and commercial operators that need isolated throughput.",
     features: [
