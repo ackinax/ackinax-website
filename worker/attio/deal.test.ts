@@ -301,3 +301,47 @@ describe("resolveDealAndAttachNote", () => {
     }
   });
 });
+
+describe("Deal title fallback when the submission carries no name", () => {
+  async function createdDealName(input: DealInput): Promise<string> {
+    const client = fakeClient();
+    client.post.mockImplementation(async (path: string) => {
+      if (path.endsWith("/records/query")) return ok([]);
+      if (path === "/v2/objects/deals/records") return ok({ id: { record_id: "deal-1" } });
+      return ok({ id: { note_id: "note-1" } });
+    });
+
+    await resolveDealAndAttachNote(client, input);
+
+    const createCall = client.post.mock.calls.find(([path]) => path === "/v2/objects/deals/records");
+    const body = createCall![1] as { data: { values: { name: string } } };
+    return body.data.values.name;
+  }
+
+  it("falls back to the email, matching the Slack message rather than 'New lead'", async () => {
+    const name = await createdDealName(
+      baseInput({ personName: undefined, identity: { email: "msii@o2.pl" }, project: "Core Miner" }),
+    );
+    expect(name).toBe("msii@o2.pl · Core Miner");
+  });
+
+  it("falls back to the Telegram handle when there is no email", async () => {
+    const name = await createdDealName(baseInput({ personName: undefined, identity: { telegram: "jesion1" } }));
+    expect(name).toBe("jesion1 · RPC endpoint");
+  });
+
+  it("falls back to the phone when that is the only identifier", async () => {
+    const name = await createdDealName(baseInput({ personName: undefined, identity: { phone: "+353899747961" } }));
+    expect(name).toBe("+353899747961 · RPC endpoint");
+  });
+
+  it("still prefers a supplied name over any identifier", async () => {
+    const name = await createdDealName(baseInput({ identity: { email: "msii@o2.pl" } }));
+    expect(name).toBe("Frank · RPC endpoint");
+  });
+
+  it("uses 'New lead' only when nothing at all identifies the submitter", async () => {
+    const name = await createdDealName(baseInput({ personName: undefined, identity: {} }));
+    expect(name).toBe("New lead · RPC endpoint");
+  });
+});

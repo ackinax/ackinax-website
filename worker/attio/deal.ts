@@ -67,8 +67,22 @@ function findOpenDeal(records: AttioDealRecord[]): AttioDealRecord | undefined {
   });
 }
 
+/**
+ * Mirrors the Slack lead message's sender fallback in worker/index.ts rather
+ * than dropping straight to "New lead". A submission with no name still
+ * carries an identifier worth showing, and this title is written once at
+ * creation - a later submission from the same person that does supply a name
+ * appends a Note to the existing Deal and never rewrites the title, so
+ * "New lead" would otherwise stick permanently. Identifiers come from the
+ * normalized identity, so the title matches what was actually stored.
+ */
 function buildDealName(input: DealInput): string {
-  const who = input.personName || "New lead";
+  const who =
+    input.personName ||
+    input.identity.email ||
+    input.identity.telegram ||
+    input.identity.phone ||
+    "New lead";
   const context = input.project || input.source;
   return `${who} · ${context}`;
 }
