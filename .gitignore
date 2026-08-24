@@ -18,6 +18,9 @@ dist-ssr
 # Local Miniflare state written by `wrangler dev` (cache, observability traces)
 .wrangler/
 
+# Competitive/commercial research kept local - this repo is public
+Docs/research/
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
